@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#050810" />
+<title>Reconocimiento facial · Veridia</title>
+<meta name="description" content="Reconocimiento facial con prueba de vida, directamente en el navegador. Todo el procesamiento ocurre en tu dispositivo." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    color-scheme: dark;
+    --background: #050810;
+    --foreground: #e2e8f0;
+    --emerald-400: #34d399;
+    --emerald-300: #6ee7b7;
+    --cyan-500: #06b6d4;
+    --cyan-400: #22d3ee;
+    --cyan-300: #67e8f9;
+    --teal-200: #99f6e4;
+    --slate-950: #020617;
+    --slate-900: #0f172a;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --amber-300: #fcd34d;
+    --amber-200: #fde68a;
+    --rose-300: #fda4af;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  a { color: inherit; text-decoration: none; }
+  .mono { font-family: "Geist Mono", ui-monospace, monospace; }
+
+  /* ---------- Utilidades de marca ---------- */
+  .wrap { width: 100%; max-width: 72rem; margin: 0 auto; padding: 0 1rem; }
+  @media (min-width: 640px) { .wrap { padding: 0 1.5rem; } }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    border: 0; cursor: pointer; font: inherit; border-radius: 999px;
+    padding: .625rem 1.25rem; font-size: .875rem; font-weight: 600;
+    transition: filter .2s, box-shadow .2s, transform .08s, background .2s;
+  }
+  .btn-primary {
+    background: linear-gradient(to right, var(--emerald-400), var(--cyan-400));
+    color: var(--slate-950);
+    box-shadow: 0 10px 25px -5px rgba(16,185,129,.2);
+  }
+  .btn-primary:hover { filter: brightness(1.1); box-shadow: 0 10px 25px -5px rgba(16,185,129,.3); }
+  .btn-primary:active { transform: scale(.98); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-ghost {
+    background: rgba(255,255,255,.05); color: #fff;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.15);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,.1); }
+  .btn-lg { padding: .75rem 1.5rem; font-size: 1rem; }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(to right, rgba(148,163,184,.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(148,163,184,.06) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 75%);
+    mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 75%);
+  }
+  .text-gradient {
+    background: linear-gradient(to right, var(--emerald-300), var(--teal-200), var(--cyan-300));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* ---------- Header ---------- */
+  header.site {
+    position: sticky; top: 0; z-index: 40;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    background: rgba(5,8,16,.7); backdrop-filter: blur(16px);
+  }
+  header .bar { display: flex; height: 4rem; align-items: center; justify-content: space-between; }
+  .logo { display: inline-flex; align-items: center; gap: .625rem; }
+  .logo .mark {
+    display: grid; place-items: center; height: 2.25rem; width: 2.25rem; border-radius: .75rem;
+    background: linear-gradient(135deg, var(--emerald-400), var(--cyan-500));
+    color: var(--slate-950); box-shadow: 0 10px 20px -5px rgba(16,185,129,.25);
+  }
+  .logo .name { font-size: 1.125rem; font-weight: 600; letter-spacing: -.01em; color: #fff; }
+  .nav { display: none; gap: 2rem; font-size: .875rem; color: var(--slate-400); }
+  @media (min-width: 768px) { .nav { display: flex; align-items: center; } }
+  .nav a:hover { color: #fff; }
+
+  /* ---------- Hero / encabezado del módulo ---------- */
+  .module { position: relative; overflow: hidden; }
+  .module .glow {
+    pointer-events: none; position: absolute; top: -10rem; left: 50%; transform: translateX(-50%);
+    height: 520px; width: 820px; border-radius: 999px; background: rgba(16,185,129,.1); filter: blur(100px);
+  }
+  .module .inner { position: relative; padding: 2.5rem 0 1rem; }
+  @media (min-width: 1024px) { .module .inner { padding: 3.5rem 0 1rem; } }
+  .eyebrow { display: inline-flex; align-items: center; gap: .5rem; font-size: .8rem; font-weight: 500; color: var(--emerald-300);
+    background: rgba(255,255,255,.05); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1);
+    padding: .25rem .75rem; border-radius: 999px; }
+  .eyebrow .dot { height: .375rem; width: .375rem; border-radius: 999px; background: var(--emerald-400); animation: pulse 2s infinite; }
+  @keyframes pulse { 50% { opacity: .4; } }
+  h1.title { margin: 1.25rem 0 0; font-size: 2rem; font-weight: 600; line-height: 1.1; letter-spacing: -.02em; color: #fff; }
+  @media (min-width: 640px) { h1.title { font-size: 2.75rem; } }
+  p.lede { margin: 1rem 0 0; max-width: 40rem; font-size: 1.05rem; color: var(--slate-400); }
+
+  .tips { display: grid; gap: .75rem; margin-top: 1.75rem; grid-template-columns: 1fr 1fr; }
+  @media (min-width: 768px) { .tips { grid-template-columns: repeat(4, 1fr); } }
+  .tip { display: flex; align-items: flex-start; gap: .625rem; border-radius: 1rem; padding: .875rem;
+    background: rgba(255,255,255,.03); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); font-size: .82rem; color: var(--slate-400); }
+  .tip svg { color: var(--emerald-300); flex: none; width: 1.1rem; height: 1.1rem; margin-top: .05rem; }
+
+  /* ---------- Módulo facial ---------- */
+  main { flex: 1; }
+  .stage-wrap { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; padding: 2.5rem 0 4rem; }
+  .stage {
+    position: relative; width: 100%; max-width: 380px; aspect-ratio: 3/4; overflow: hidden;
+    border-radius: 2.25rem; background: var(--slate-950);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 25px 50px -12px rgba(16,185,129,.05);
+  }
+  video, canvas.mesh, img.preview { position: absolute; inset: 0; width: 100%; height: 100%; }
+  video { object-fit: cover; transform: scaleX(-1); }
+  canvas.mesh { pointer-events: none; }
+  img.preview { object-fit: cover; }
+  svg.oval { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+  .scanwrap { position: absolute; left: 14%; right: 14%; top: 14%; bottom: 19%; overflow: hidden; border-radius: 50%; pointer-events: none; }
+  .scanwrap .scan { position: absolute; left: 0; right: 0; height: 4rem;
+    background: linear-gradient(to bottom, transparent, rgba(52,211,153,.2), transparent); animation: scan 2.4s ease-in-out infinite; }
+  @keyframes scan { 0% { top: -15%; } 50% { top: 100%; } 100% { top: -15%; } }
+
+  .msg { position: absolute; left: 1rem; right: 1rem; top: 1rem; text-align: center;
+    border-radius: 1rem; padding: .625rem 1rem; font-size: .875rem; font-weight: 500; backdrop-filter: blur(8px); }
+  .msg.neutral { background: rgba(255,255,255,.1); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); }
+  .msg.ok { background: rgba(52,211,153,.15); color: var(--emerald-300); box-shadow: inset 0 0 0 1px rgba(110,231,183,.3); }
+  .msg.warn { background: rgba(251,191,36,.15); color: var(--amber-200); box-shadow: inset 0 0 0 1px rgba(252,211,77,.3); }
+
+  .notice { position: absolute; left: 1.5rem; right: 1.5rem; top: 4.5rem; text-align: center;
+    border-radius: .75rem; padding: .5rem .75rem; font-size: .75rem; font-weight: 500; color: var(--amber-200);
+    background: rgba(15,23,42,.8); box-shadow: inset 0 0 0 1px rgba(252,211,77,.3); backdrop-filter: blur(8px); }
+
+  .challenge { position: absolute; left: 1.5rem; right: 1.5rem; bottom: 1.25rem; display: flex; align-items: center; gap: .75rem;
+    border-radius: 1rem; padding: .75rem; background: rgba(15,23,42,.8); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); backdrop-filter: blur(8px); }
+  .challenge .icon { display: grid; place-items: center; height: 3rem; width: 3rem; flex: none; border-radius: .75rem;
+    background: linear-gradient(135deg, var(--emerald-400), var(--cyan-500)); color: var(--slate-950); }
+  .challenge .kicker { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--slate-400); }
+  .challenge .label { font-weight: 600; color: #fff; }
+  .countbar { margin-top: .4rem; height: .25rem; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.1); }
+  .countbar > span { display: block; height: 100%; border-radius: 999px; background: var(--emerald-400); width: 100%; }
+  .countbar.run > span { animation: countdown linear forwards; }
+  @keyframes countdown { to { width: 0%; } }
+
+  .anim-left { animation: nudgeL 1.2s ease-in-out infinite; }
+  .anim-right { animation: nudgeR 1.2s ease-in-out infinite; }
+  .anim-blink { animation: blink 1.2s ease-in-out infinite; }
+  .anim-pop { animation: pop 1.2s ease-in-out infinite; }
+  @keyframes nudgeL { 50% { transform: translateX(-5px); } }
+  @keyframes nudgeR { 50% { transform: translateX(5px); } }
+  @keyframes blink { 50% { transform: scaleY(.1); } }
+  @keyframes pop { 50% { transform: scale(1.15); } }
+
+  /* Capas que cubren la cámara (intro / loading / error / done) */
+  .cover { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1.25rem; padding: 2rem; text-align: center; background: rgba(2,6,23,.9); backdrop-filter: blur(4px); }
+  .cover.hidden { display: none; }
+  .cover h3 { margin: 0; font-size: 1.125rem; font-weight: 600; color: #fff; }
+  .cover p { margin: .25rem 0 0; font-size: .875rem; color: var(--slate-400); }
+  .ping { position: relative; }
+  .ping .ring { position: absolute; inset: 0; border-radius: 999px; background: rgba(52,211,153,.2); animation: ping 1.3s cubic-bezier(0,0,.2,1) infinite; }
+  @keyframes ping { 75%, 100% { transform: scale(1.8); opacity: 0; } }
+  .ping .core { position: relative; display: grid; place-items: center; height: 5rem; width: 5rem; border-radius: 999px;
+    background: linear-gradient(135deg, var(--emerald-400), var(--cyan-500)); color: var(--slate-950); }
+  .err-ic { display: grid; place-items: center; height: 4rem; width: 4rem; border-radius: 999px;
+    background: rgba(244,63,94,.15); color: var(--rose-300); box-shadow: inset 0 0 0 1px rgba(251,113,133,.3); }
+
+  .progress { width: 100%; max-width: 15rem; height: .4rem; border-radius: 999px; background: rgba(255,255,255,.1); overflow: hidden; }
+  .progress > span { display: block; height: 100%; width: 0; border-radius: 999px;
+    background: linear-gradient(to right, var(--emerald-400), var(--cyan-400)); transition: width .3s; }
+
+  .done-cover { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    gap: .25rem; padding: 1.5rem; background: linear-gradient(to top, var(--slate-950), rgba(2,6,23,.3) 50%, transparent); }
+  .done-cover.hidden { display: none; }
+  .done-badge { margin-bottom: .75rem; display: grid; place-items: center; height: 3.5rem; width: 3.5rem; border-radius: 999px;
+    background: var(--emerald-400); color: var(--slate-950); box-shadow: 0 10px 20px -5px rgba(16,185,129,.4); animation: popin .4s cubic-bezier(.2,1.2,.3,1); }
+  @keyframes popin { from { transform: scale(0); } }
+
+  /* Lista de acciones */
+  ol.actions { display: flex; gap: .5rem; width: 100%; max-width: 380px; margin: 0; padding: 0; list-style: none; }
+  ol.actions li { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .375rem; text-align: center;
+    border-radius: 1rem; padding: .75rem .5rem; font-size: .75rem; transition: background .2s, color .2s, box-shadow .2s; }
+  ol.actions li.pending { background: rgba(255,255,255,.03); color: var(--slate-500); box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); }
+  ol.actions li.active { background: rgba(255,255,255,.1); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+  ol.actions li.done { background: rgba(52,211,153,.1); color: var(--emerald-300); box-shadow: inset 0 0 0 1px rgba(52,211,153,.3); }
+  ol.actions li svg { width: 1rem; height: 1rem; }
+
+  /* Resultado */
+  .result { display: none; width: 100%; max-width: 42rem; margin: 0 auto; flex-direction: column; gap: 1.25rem; padding: 2.5rem 0 4rem; }
+  .result.show { display: flex; }
+  .banner { display: flex; align-items: center; gap: 1rem; border-radius: 1rem; padding: 1rem; background: rgba(52,211,153,.1); box-shadow: inset 0 0 0 1px rgba(52,211,153,.25); }
+  .banner .ic { display: grid; place-items: center; height: 2.75rem; width: 2.75rem; flex: none; border-radius: 999px; background: var(--emerald-400); color: var(--slate-950); }
+  .banner.err { background: rgba(244,63,94,.1); box-shadow: inset 0 0 0 1px rgba(244,63,94,.25); }
+  .banner.err .ic { background: var(--rose-300); }
+  .banner p.t { margin: 0; font-weight: 600; color: #fff; }
+  .banner p.s { margin: 0; font-size: .875rem; color: rgba(209,250,229,.7); }
+  .result-grid { display: grid; gap: 1.25rem; grid-template-columns: 1fr; }
+  @media (min-width: 640px) { .result-grid { grid-template-columns: 220px 1fr; } }
+  img.shot { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 1.5rem; box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); transform: scaleX(-1); }
+  .panel { border-radius: 1rem; padding: 1.25rem; background: rgba(255,255,255,.03); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
+  .panel .kicker { margin: 0 0 .75rem; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--slate-400); }
+  .stat { border-bottom: 1px solid rgba(255,255,255,.05); padding-bottom: .75rem; margin-bottom: .75rem; }
+  .stat:last-child { border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
+  .stat .k { margin: 0; font-size: .75rem; color: var(--slate-400); }
+  .stat .v { margin: .1rem 0 0; font-weight: 500; color: #fff; }
+  .actions-row { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .75rem; }
+
+  .alert { display: none; align-items: flex-start; gap: .625rem; border-radius: 1rem; padding: .875rem 1rem; font-size: .85rem;
+    background: rgba(255,255,255,.03); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); color: var(--slate-400); max-width: 380px; }
+  .alert.show { display: flex; }
+  .alert svg { flex: none; width: 1.1rem; height: 1.1rem; color: var(--cyan-300); margin-top: .05rem; }
+
+  footer.site { margin-top: auto; border-top: 1px solid rgba(255,255,255,.05); }
+  footer .bar { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 2rem 0; font-size: .875rem; color: var(--slate-500); }
+  @media (min-width: 640px) { footer .bar { flex-direction: row; } }
+</style>
+</head>
+<body>
+  <!-- ============ HEADER ============ -->
+  <header class="site">
+    <div class="wrap bar">
+      <span class="logo">
+        <span class="mark" data-icon="shield" data-stroke="2.5"></span>
+        <span class="name">Veridia</span>
+      </span>
+      <nav class="nav">
+        <a href="#">Módulos</a>
+        <a href="#">Cómo funciona</a>
+        <a href="#">Seguridad</a>
+      </nav>
+      <button class="btn btn-primary" style="padding:.5rem 1rem" id="topBtn">Verificar identidad</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ ENCABEZADO DEL MÓDULO ============ -->
+    <section class="module">
+      <div class="grid-bg" style="position:absolute;inset:0;pointer-events:none"></div>
+      <div class="glow"></div>
+      <div class="wrap inner">
+        <span class="eyebrow"><span class="dot"></span>Módulo 01 · Biometría facial</span>
+        <h1 class="title">Reconocimiento facial con <span class="text-gradient">prueba de vida</span></h1>
+        <p class="lede">Como en tu app bancaria: ubica tu rostro en el óvalo y realiza acciones aleatorias
+          para demostrar que eres una persona real. Todo se procesa en tu navegador; ninguna imagen se envía ni se guarda.</p>
+        <div class="tips">
+          <div class="tip"><span data-icon="bulb"></span><span>Busca buena luz frontal, evita contraluz.</span></div>
+          <div class="tip"><span data-icon="scan"></span><span>Retira gafas oscuras, gorra o tapabocas.</span></div>
+          <div class="tip"><span data-icon="eye"></span><span>Mantén la cámara a la altura de los ojos.</span></div>
+          <div class="tip"><span data-icon="smile"></span><span>Realiza cada acción de forma natural y pausada.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MÓDULO FACIAL ============ -->
+    <div class="wrap">
+      <div class="stage-wrap" id="module">
+        <div class="stage" id="stage">
+          <video id="video" autoplay playsinline muted></video>
+          <canvas class="mesh" id="mesh"></canvas>
+          <img class="preview" id="preview" alt="Captura" style="display:none" />
+
+          <svg class="oval" viewBox="0 0 300 400" preserveAspectRatio="none">
+            <path fill-rule="evenodd" fill="rgba(3,6,14,0.78)"
+              d="M0 0h300v400H0z M150 48 a108 142 0 1 1 0 284 a108 142 0 1 1 0 -284" />
+            <path d="M150 48 a108 142 0 1 1 0 284 a108 142 0 1 1 0 -284" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="4" />
+            <path id="ovalStroke" d="M150 48 a108 142 0 1 1 0 284 a108 142 0 1 1 0 -284" fill="none"
+              stroke="rgba(255,255,255,0.55)" stroke-width="4" stroke-linecap="round"
+              pathLength="100" stroke-dasharray="100 100" stroke-dashoffset="100"
+              style="transition:stroke-dashoffset .6s ease-out, stroke .4s" />
+          </svg>
+
+          <div class="scanwrap" id="scanwrap" style="display:none"><div class="scan"></div></div>
+
+          <div class="msg" id="msg" style="display:none"></div>
+          <div class="notice" id="notice" style="display:none"></div>
+
+          <div class="challenge" id="challenge" style="display:none">
+            <span class="icon" id="chIcon"></span>
+            <div style="min-width:0;flex:1">
+              <p class="kicker" id="chKicker">Acción 1 de 3</p>
+              <p class="label" id="chLabel">Parpadea</p>
+              <div class="countbar" id="countbar"><span></span></div>
+            </div>
+          </div>
+
+          <!-- Cubiertas -->
+          <div class="cover" id="cover">
+            <!-- intro -->
+            <div id="introView">
+              <div class="ping" style="margin:0 auto">
+                <span class="ring"></span>
+                <span class="core" data-icon="scan" data-size="40"></span>
+              </div>
+              <div style="margin-top:1.25rem">
+                <h3>Verificación facial</h3>
+                <p>Te pediremos realizar 3 acciones simples para confirmar que eres una persona real.</p>
+              </div>
+              <button class="btn btn-primary" id="startBtn" style="margin-top:1.25rem">
+                <span data-icon="camera" data-size="16"></span> Activar cámara
+              </button>
+            </div>
+            <!-- loading -->
+            <div id="loadView" style="display:none;width:100%">
+              <p style="font-weight:600;color:#fff;margin:0 0 1rem">Preparando la verificación</p>
+              <p id="loadMsg" style="color:var(--slate-400);font-size:.875rem;margin:0 0 .75rem">Descargando modelos de IA…</p>
+              <div class="progress" style="margin:0 auto"><span id="loadBar"></span></div>
+            </div>
+            <!-- error -->
+            <div id="errView" style="display:none">
+              <div class="err-ic" style="margin:0 auto" data-icon="alert" data-size="32"></div>
+              <div style="margin-top:1.25rem">
+                <p style="font-weight:600;color:#fff;margin:0">No pudimos completar la verificación</p>
+                <p id="errMsg" style="color:var(--slate-400);font-size:.875rem;margin:.25rem 0 0"></p>
+              </div>
+              <button class="btn btn-primary" id="retryBtn" style="margin-top:1.25rem">
+                <span data-icon="refresh" data-size="16"></span> Reintentar
+              </button>
+            </div>
+          </div>
+
+          <div class="done-cover hidden" id="doneCover">
+            <span class="done-badge" data-icon="check" data-size="32" data-stroke="3"></span>
+            <p style="font-size:1.125rem;font-weight:600;color:#fff;margin:0">Prueba de vida superada</p>
+          </div>
+        </div>
+
+        <ol class="actions" id="actions"></ol>
+
+        <div class="alert" id="ctxAlert">
+          <span data-icon="info"></span>
+          <div>La cámara requiere <b>HTTPS</b> o <b>localhost</b>. Si abriste el archivo como <span class="mono">file://</span>,
+          sírvelo con un servidor local (p. ej. <span class="mono">npx serve</span>) para habilitar la cámara.</div>
+        </div>
+      </div>
+
+      <!-- ============ RESULTADO ============ -->
+      <section class="result" id="result">
+        <div class="banner" id="banner">
+          <span class="ic" id="bannerIc" data-icon="check" data-size="24" data-stroke="3"></span>
+          <div>
+            <p class="t" id="bannerTitle">Prueba de vida superada</p>
+            <p class="s" id="bannerText">Confirmamos que hay una persona real frente a la cámara.</p>
+          </div>
+        </div>
+        <div class="result-grid" id="resultGrid">
+          <img class="shot" id="shot" alt="Selfie" />
+          <div class="panel">
+            <p class="kicker">Resultado del análisis</p>
+            <div id="stats"></div>
+          </div>
+        </div>
+        <div class="actions-row">
+          <button class="btn btn-ghost" id="againBtn"><span data-icon="refresh" data-size="16"></span> Repetir</button>
+          <button class="btn btn-primary" id="downloadBtn">Descargar reporte <span data-icon="arrow-right" data-size="16"></span></button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site">
+    <div class="wrap bar">
+      <span class="logo">
+        <span class="mark" data-icon="shield" data-stroke="2.5"></span>
+        <span class="name">Veridia</span>
+      </span>
+      <p style="margin:0">Verificación biométrica de identidad · Todo el procesamiento ocurre en tu dispositivo.</p>
+    </div>
+  </footer>
+
+<script type="module">
+/* ========================================================================
+   Veridia — Reconocimiento facial (standalone, un solo archivo)
+   Mismo diseño que la landing. Carga @vladmandic/face-api y sus modelos
+   desde un CDN público. Todo el análisis corre en el navegador: nada se
+   transmite ni se almacena.
+   ======================================================================== */
+import * as faceapi from "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/dist/face-api.esm.js";
+const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model";
+
+/* ---------- Iconos (lucide) ---------- */
+const ICONS = {
+  shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+  smile: '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>',
+  scan: '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>',
+  bulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+  camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+  alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  "arrow-left": '<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>',
+  "arrow-right": '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+};
+function iconSvg(name, size = 20, stroke = 2) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] || ""}</svg>`;
+}
+document.querySelectorAll("[data-icon]").forEach((el) => {
+  el.innerHTML = iconSvg(el.dataset.icon, +(el.dataset.size || 20), +(el.dataset.stroke || 2));
+});
+
+/* ---------- Retos ---------- */
+const CHALLENGES = {
+  blink: { label: "Parpadea", hint: "Cierra los ojos un instante y vuelve a abrirlos", icon: "eye", anim: "anim-blink" },
+  left:  { label: "Gira a tu izquierda", hint: "Gira suavemente la cabeza", icon: "arrow-left", anim: "anim-left" },
+  right: { label: "Gira a tu derecha", hint: "Gira suavemente la cabeza", icon: "arrow-right", anim: "anim-right" },
+  smile: { label: "Sonríe", hint: "Muestra una sonrisa natural", icon: "smile", anim: "anim-pop" },
+};
+const OVAL = { cx: 0.5, cy: 0.475, rx: 0.36, ry: 0.355 };
+const CHALLENGE_TIMEOUT = 10000;
+const MAX_TIMEOUTS = 4;
+const ANALYSIS_WIDTH = 480;
+const BASELINE_SIZE = 40;
+const now = () => performance.now();
+
+/* ---------- Elementos ---------- */
+const $ = (id) => document.getElementById(id);
+const stage = $("stage"), video = $("video"), mesh = $("mesh"), mctx = mesh.getContext("2d");
+const ovalStroke = $("ovalStroke"), scanwrap = $("scanwrap");
+const msgEl = $("msg"), noticeEl = $("notice"), challengeEl = $("challenge");
+const cover = $("cover"), introView = $("introView"), loadView = $("loadView"), errView = $("errView");
+const doneCover = $("doneCover"), actionsEl = $("actions"), preview = $("preview");
+
+/* ---------- Estado ---------- */
+const S = {
+  phase: "intro", running: false, busy: false,
+  challenges: [], idx: 0, goodFrames: 0,
+  challengeStart: 0, startedAt: 0,
+  earBase: [], contrastBase: [], eyesClosed: false, closedAt: 0,
+  timeouts: 0, timeoutsHere: 0, captureFails: 0,
+  message: "",
+};
+let loopTimer = null, noticeTimer = null, faceReady = false, report = null;
+const frameCanvas = document.createElement("canvas");
+const eyeScratch = document.createElement("canvas");
+
+/* ---------- Carga de modelos ---------- */
+async function loadModels() {
+  if (faceReady) return;
+  const steps = [
+    ["Detector de rostro", () => faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)],
+    ["Puntos faciales", () => faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)],
+    ["Expresiones", () => faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)],
+    ["Descriptor facial", () => faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)],
+  ];
+  for (let i = 0; i < steps.length; i++) {
+    $("loadMsg").textContent = `Descargando: ${steps[i][0]}…`;
+    $("loadBar").style.width = `${Math.round((i / steps.length) * 100)}%`;
+    await steps[i][1]();
+  }
+  $("loadBar").style.width = "100%";
+  faceReady = true;
+}
+// Empezar a descargar en segundo plano apenas carga la página.
+loadModels().catch(() => {});
+
+/* ---------- Cámara ---------- */
+let stream = null;
+async function startCamera() {
+  stopCamera();
+  stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false,
+  });
+  video.srcObject = stream;
+  await new Promise((res, rej) => {
+    const t = setTimeout(() => rej(new Error("timeout")), 6000);
+    video.onloadedmetadata = () => { clearTimeout(t); video.play().then(res).catch(res); };
+  });
+}
+function stopCamera() {
+  if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; }
+  video.srcObject = null;
+}
+
+/* ---------- Métricas ---------- */
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+function eyeAspectRatio(eye) {
+  const v = (dist(eye[1], eye[5]) + dist(eye[2], eye[4])) / 2;
+  return v / (dist(eye[0], eye[3]) || 1);
+}
+function estimateYaw(pts) {
+  const le = pts.slice(36, 42), re = pts.slice(42, 48);
+  const lc = le.reduce((a, p) => a + p.x, 0) / le.length;
+  const rc = re.reduce((a, p) => a + p.x, 0) / re.length;
+  const mid = (lc + rc) / 2, span = (rc - lc) || 1;
+  return (pts[30].x - mid) / span;
+}
+function eyeContrast(src, eye, scratch) {
+  const xs = eye.map((p) => p.x), ys = eye.map((p) => p.y);
+  let minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+  const pad = (maxX - minX) * 0.3; minX -= pad; maxX += pad; minY -= pad; maxY += pad;
+  const w = Math.max(2, Math.round(maxX - minX)), h = Math.max(2, Math.round(maxY - minY));
+  scratch.width = w; scratch.height = h;
+  const ctx = scratch.getContext("2d", { willReadFrequently: true });
+  try { ctx.drawImage(src, minX, minY, w, h, 0, 0, w, h); } catch { return 0; }
+  const data = ctx.getImageData(0, 0, w, h).data;
+  let sum = 0, sum2 = 0, n = w * h;
+  for (let i = 0; i < data.length; i += 4) {
+    const g = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+    sum += g; sum2 += g * g;
+  }
+  const mean = sum / n, varr = Math.max(0, sum2 / n - mean * mean);
+  return Math.sqrt(varr) / (mean + 1);
+}
+function median(arr) {
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a, b) => a - b);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+function coverRect(sw, sh, dw, dh) {
+  const scale = Math.max(dw / sw, dh / sh);
+  const w = dw / scale, h = dh / scale;
+  return { sx: (sw - w) / 2, sy: (sh - h) / 2, sw: w, sh: h };
+}
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+/* ---------- UI helpers ---------- */
+function setOvalColor(c) { ovalStroke.setAttribute("stroke", c); }
+function setProgress(p) { ovalStroke.style.strokeDashoffset = String(100 - Math.max(p, 0)); }
+function feedback(text, tone) {
+  if (S.message === text + tone) return;
+  S.message = text + tone;
+  msgEl.textContent = text;
+  msgEl.className = "msg " + tone;
+  msgEl.style.display = text ? "block" : "none";
+}
+function showNotice(text) {
+  noticeEl.textContent = text; noticeEl.style.display = "block";
+  if (noticeTimer) clearTimeout(noticeTimer);
+  noticeTimer = setTimeout(() => (noticeEl.style.display = "none"), 3500);
+}
+function grabFrame() {
+  const w = ANALYSIS_WIDTH, h = Math.round((video.videoHeight / video.videoWidth) * w);
+  if (frameCanvas.width !== w || frameCanvas.height !== h) { frameCanvas.width = w; frameCanvas.height = h; }
+  frameCanvas.getContext("2d", { willReadFrequently: true }).drawImage(video, 0, 0, w, h);
+  return frameCanvas;
+}
+function renderActions() {
+  actionsEl.innerHTML = "";
+  S.challenges.forEach((ch, i) => {
+    const state = S.phase === "done" || S.phase === "capture" || i < S.idx ? "done"
+      : S.phase === "challenge" && i === S.idx ? "active" : "pending";
+    const li = document.createElement("li");
+    li.className = state;
+    li.innerHTML = (state === "done" ? iconSvg("check", 16) : iconSvg(CHALLENGES[ch].icon, 16)) +
+      `<span style="line-height:1.1">${CHALLENGES[ch].label}</span>`;
+    actionsEl.appendChild(li);
+  });
+}
+function showChallengeCard() {
+  const ch = S.challenges[S.idx];
+  if (!ch) { challengeEl.style.display = "none"; return; }
+  const cfg = CHALLENGES[ch];
+  $("chIcon").innerHTML = `<span class="${cfg.anim}" style="display:grid">${iconSvg(cfg.icon, 24, 2.5)}</span>`;
+  $("chKicker").textContent = `Acción ${S.idx + 1} de ${S.challenges.length}`;
+  $("chLabel").textContent = cfg.label;
+  challengeEl.style.display = "flex";
+  const bar = $("countbar");
+  bar.classList.remove("run"); void bar.offsetWidth;
+  bar.querySelector("span").style.animationDuration = CHALLENGE_TIMEOUT + "ms";
+  bar.classList.add("run");
+}
+function setCover(view) {
+  cover.classList.toggle("hidden", !view);
+  introView.style.display = view === "intro" ? "block" : "none";
+  loadView.style.display = view === "loading" ? "block" : "none";
+  errView.style.display = view === "error" ? "block" : "none";
+}
+
+/* ---------- Flujo ---------- */
+$("startBtn").addEventListener("click", begin);
+$("retryBtn").addEventListener("click", begin);
+$("topBtn").addEventListener("click", () => { $("module").scrollIntoView({ behavior: "smooth" }); });
+$("againBtn").addEventListener("click", begin);
+$("downloadBtn").addEventListener("click", downloadReport);
+window.addEventListener("pagehide", stopCamera);
+
+async function begin() {
+  $("result").classList.remove("show");
+  stage.style.display = "";
+  actionsEl.style.display = "flex";
+  preview.style.display = "none";
+  doneCover.classList.add("hidden");
+  feedback("", "neutral");
+  noticeEl.style.display = "none";
+  setProgress(0); setOvalColor("rgba(255,255,255,0.55)");
+  S.phase = "loading"; setCover("loading");
+  try {
+    await loadModels();
+    $("loadMsg").textContent = "Encendiendo la cámara…";
+    await startCamera();
+  } catch (e) { return fail(cameraError(e)); }
+
+  const picked = shuffle(["blink", "smile", Math.random() < 0.5 ? "left" : "right"]);
+  Object.assign(S, {
+    phase: "position", running: true, busy: false,
+    challenges: picked, idx: 0, goodFrames: 0,
+    earBase: [], contrastBase: [], eyesClosed: false,
+    timeouts: 0, timeoutsHere: 0, captureFails: 0,
+    startedAt: now(), message: "",
+  });
+  renderActions();
+  setCover(null);
+  challengeEl.style.display = "none";
+  loop();
+}
+
+function fail(text) {
+  S.running = false; clearTimeout(loopTimer); stopCamera();
+  mctx.clearRect(0, 0, mesh.width, mesh.height);
+  scanwrap.style.display = "none"; challengeEl.style.display = "none";
+  $("errMsg").textContent = text;
+  S.phase = "error"; setCover("error");
+}
+function cameraError(e) {
+  const n = e?.name || "";
+  if (n === "NotAllowedError") return "Permiso de cámara denegado. Habilítalo en el navegador e inténtalo de nuevo.";
+  if (n === "NotFoundError") return "No se encontró ninguna cámara en el dispositivo.";
+  if (n === "NotReadableError") return "La cámara está siendo usada por otra aplicación.";
+  if (!window.isSecureContext) return "La cámara necesita HTTPS o localhost. Sirve el archivo con un servidor local.";
+  if (e?.message === "timeout") return "La cámara tardó demasiado en responder. Reintenta.";
+  return "No pudimos iniciar la cámara: " + (e?.message || e);
+}
+
+function loop() {
+  if (!S.running) return;
+  if (video.readyState >= 2 && video.videoWidth && !S.busy) {
+    analyze().catch(() => {}).finally(() => { if (S.running) loopTimer = setTimeout(loop, 0); });
+  } else if (S.running) {
+    loopTimer = setTimeout(loop, 30);
+  }
+}
+
+async function analyze() {
+  const frame = grabFrame();
+  const needExpr = S.phase === "capture" || (S.phase === "challenge" && S.challenges[S.idx] === "smile");
+  const base = faceapi
+    .detectSingleFace(frame, new faceapi.TinyFaceDetectorOptions({ inputSize: 288, scoreThreshold: 0.45 }))
+    .withFaceLandmarks();
+  const det = needExpr ? await base.withFaceExpressions() : await base;
+  if (S.running) process(frame, det || null);
+}
+
+function process(frame, det) {
+  const cw = stage.clientWidth, ch = stage.clientHeight;
+  const c = coverRect(frame.width, frame.height, cw, ch);
+  const dpr = window.devicePixelRatio || 1;
+  if (mesh.width !== cw * dpr) { mesh.width = cw * dpr; mesh.height = ch * dpr; }
+  mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  mctx.clearRect(0, 0, cw, ch);
+
+  if (S.phase === "challenge" && now() - S.challengeStart > CHALLENGE_TIMEOUT) { handleTimeout(); return; }
+
+  if (!det) { S.goodFrames = 0; feedback("Ubica tu rostro dentro del óvalo", "warn"); return; }
+
+  const pts = det.landmarks.positions;
+  mctx.fillStyle = "rgba(94, 234, 212, 0.55)";
+  for (const p of pts) {
+    const x = (1 - (p.x - c.sx) / c.sw) * cw, y = ((p.y - c.sy) / c.sh) * ch;
+    mctx.beginPath(); mctx.arc(x, y, 1.4, 0, Math.PI * 2); mctx.fill();
+  }
+
+  const box = det.detection.box;
+  const cx = 1 - (box.x + box.width / 2 - c.sx) / c.sw;
+  const cy = (box.y + box.height / 2 - c.sy) / c.sh;
+  const width = box.width / c.sw;
+  const yaw = estimateYaw(pts);
+  const happy = det.expressions?.happy ?? 0;
+  const offset = ((cx - OVAL.cx) / OVAL.rx) ** 2 + ((cy - OVAL.cy) / OVAL.ry) ** 2;
+
+  const leftEye = det.landmarks.getLeftEye(), rightEye = det.landmarks.getRightEye();
+  const ear = (eyeAspectRatio(leftEye) + eyeAspectRatio(rightEye)) / 2;
+  const contrast = (eyeContrast(frame, leftEye, eyeScratch) + eyeContrast(frame, rightEye, eyeScratch)) / 2;
+  const earRef = median(S.earBase), contrastRef = median(S.contrastBase);
+  const calibrated = S.earBase.length >= 6;
+  const looksClosed = calibrated && (ear < earRef * 0.8 || contrast < contrastRef * 0.68);
+  const looksOpen = !calibrated || (ear > earRef * 0.9 && contrast > contrastRef * 0.85);
+  if (Math.abs(yaw) < 0.2 && !looksClosed && !S.eyesClosed) {
+    S.earBase.push(ear); S.contrastBase.push(contrast);
+    if (S.earBase.length > BASELINE_SIZE) { S.earBase.shift(); S.contrastBase.shift(); }
+  }
+
+  if (S.phase === "position" || S.phase === "capture") {
+    let issue = null;
+    if (width < 0.36) issue = "Acércate un poco a la cámara";
+    else if (width > 0.78) issue = "Aléjate un poco de la cámara";
+    else if (offset > 0.3) issue = "Centra tu rostro en el óvalo";
+    else if (Math.abs(yaw) > (S.phase === "capture" ? 0.16 : 0.25)) issue = "Mira directamente a la cámara";
+    else if (S.phase === "capture" && happy > 0.6) issue = "Mantén una expresión neutral";
+    else if (S.phase === "capture" && looksClosed) issue = "Mantén los ojos abiertos";
+
+    if (issue) { S.goodFrames = 0; feedback(issue, "warn"); return; }
+    S.goodFrames++;
+
+    if (S.phase === "position") {
+      feedback("¡Perfecto! Mantente así", "ok");
+      setOvalColor("#34d399");
+      if (S.goodFrames >= 10) startChallenge(0, true);
+      return;
+    }
+    feedback("Capturando… no te muevas", "ok");
+    if (S.goodFrames >= 4) capture();
+    return;
+  }
+
+  if (S.phase === "challenge") {
+    if (offset > 0.9 || width < 0.25) { feedback("Mantén tu rostro dentro del óvalo", "warn"); return; }
+    const current = S.challenges[S.idx];
+    let passed = false;
+    if (current === "blink") {
+      if (!S.eyesClosed && looksClosed) { S.eyesClosed = true; S.closedAt = now(); }
+      else if (S.eyesClosed && looksOpen) { passed = true; }
+      else if (S.eyesClosed && now() - S.closedAt > 2500) { S.eyesClosed = false; }
+      feedback(S.eyesClosed ? "¡Bien! Ahora abre los ojos" : CHALLENGES.blink.hint, S.eyesClosed ? "ok" : "neutral");
+    } else {
+      feedback(CHALLENGES[current].hint, "neutral");
+      if (current === "left") passed = yaw > 0.3;
+      else if (current === "right") passed = yaw < -0.3;
+      else if (current === "smile") passed = happy > 0.75;
+    }
+    if (passed) {
+      const next = S.idx + 1;
+      if (next >= S.challenges.length) {
+        S.idx = next; S.goodFrames = 0; S.phase = "capture";
+        renderActions(); challengeEl.style.display = "none";
+        setProgress(92); feedback("Ahora mira al frente", "ok");
+      } else {
+        startChallenge(next, true);
+      }
+    }
+    setProgress((S.idx / Math.max(S.challenges.length, 1)) * 85);
+  }
+}
+
+function handleTimeout() {
+  S.timeouts++; S.timeoutsHere++;
+  if (S.timeouts > MAX_TIMEOUTS) { fail("No pudimos detectar las acciones solicitadas. Busca buena iluminación frontal y vuelve a intentarlo."); return; }
+  if (S.timeoutsHere >= 2) {
+    const unused = ["blink", "smile", "left", "right"].filter((c) => !S.challenges.includes(c));
+    const rep = shuffle(unused)[0];
+    if (rep) {
+      S.challenges = S.challenges.map((c, i) => (i === S.idx ? rep : c));
+      renderActions();
+      showNotice(`Probemos otra acción: ${CHALLENGES[rep].label.toLowerCase()}`);
+      startChallenge(S.idx, true);
+      return;
+    }
+  }
+  showNotice("No detectamos la acción. Intentémoslo otra vez, con calma.");
+  startChallenge(S.idx, false);
+}
+
+function startChallenge(i, fresh) {
+  S.idx = i; S.challengeStart = now(); S.eyesClosed = false;
+  if (fresh) S.timeoutsHere = 0;
+  S.phase = "challenge";
+  renderActions();
+  showChallengeCard();
+  setProgress((i / Math.max(S.challenges.length, 1)) * 85);
+}
+
+async function capture() {
+  S.busy = true;
+  try {
+    const shot = document.createElement("canvas");
+    shot.width = 720; shot.height = Math.round((video.videoHeight / video.videoWidth) * 720);
+    shot.getContext("2d").drawImage(video, 0, 0, shot.width, shot.height);
+    const det = await faceapi
+      .detectSingleFace(shot, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 }))
+      .withFaceLandmarks().withFaceDescriptor().catch(() => null);
+    if (!det || !det.descriptor || !Array.from(det.descriptor).every(Number.isFinite)) {
+      S.goodFrames = 0; S.captureFails++;
+      if (S.captureFails >= 6) fail("No pudimos generar tu plantilla facial en este dispositivo. Intenta con mejor iluminación o desde otro navegador.");
+      return;
+    }
+    const image = shot.toDataURL("image/jpeg", 0.9);
+    S.running = false; stopCamera(); mctx.clearRect(0, 0, mesh.width, mesh.height);
+    S.phase = "done"; setProgress(100); setOvalColor("#34d399");
+    renderActions(); challengeEl.style.display = "none"; feedback("", "neutral");
+    preview.src = image; preview.style.display = "block";
+    doneCover.classList.remove("hidden");
+    report = {
+      modulo: "reconocimiento-facial",
+      resultado: "prueba_de_vida_superada",
+      accionesCompletadas: S.challenges.map((c) => CHALLENGES[c].label),
+      duracionSegundos: +((now() - S.startedAt) / 1000).toFixed(1),
+      confianzaDeteccion: +det.detection.score.toFixed(4),
+      plantillaBiometrica: `vector de ${det.descriptor.length} dimensiones`,
+      descriptor: Array.from(det.descriptor).map((n) => +n.toFixed(5)),
+      fecha: new Date().toISOString(),
+      nota: "Procesado localmente en el navegador. Ninguna imagen fue transmitida ni almacenada.",
+    };
+    setTimeout(() => showResult(image, det.detection.score, det.descriptor.length), 1400);
+  } finally {
+    S.busy = false;
+  }
+}
+
+function showResult(image, score, dims) {
+  stage.style.display = "none";
+  actionsEl.style.display = "none";
+  $("ctxAlert").classList.remove("show");
+  $("shot").src = image;
+  const rows = [
+    ["Acciones completadas", S.challenges.map((c) => CHALLENGES[c].label).join(" · ")],
+    ["Tiempo total", `${((now() - S.startedAt) / 1000).toFixed(1)} segundos`],
+    ["Confianza de detección", `${(score * 100).toFixed(1)}%`],
+    ["Plantilla biométrica", `Vector de ${dims} dimensiones`],
+  ];
+  $("stats").innerHTML = rows.map(([k, v]) => `<div class="stat"><p class="k">${k}</p><p class="v">${v}</p></div>`).join("");
+  $("result").classList.add("show");
+  $("result").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function downloadReport() {
+  if (!report) return;
+  const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "reporte-facial.json"; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* Aviso de contexto no seguro */
+if (!window.isSecureContext) $("ctxAlert").classList.add("show");
+</script>
+</body>
+</html>
