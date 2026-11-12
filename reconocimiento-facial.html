@@ -4,8 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#050810" />
-<title>Reconocimiento facial · Veridia</title>
-<meta name="description" content="Reconocimiento facial con prueba de vida, directamente en el navegador. Todo el procesamiento ocurre en tu dispositivo." />
+<title>Veridia · Verificación de identidad biométrica</title>
+<meta name="description" content="Reconocimiento facial con prueba de vida, escaneo de documentos y validación rostro-documento, directamente en el navegador." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -22,195 +22,263 @@
     --teal-200: #99f6e4;
     --slate-950: #020617;
     --slate-900: #0f172a;
+    --slate-800: #1e293b;
     --slate-400: #94a3b8;
     --slate-500: #64748b;
-    --amber-300: #fcd34d;
     --amber-200: #fde68a;
     --rose-300: #fda4af;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; }
+  html, body { margin: 0; height: 100%; scroll-behavior: smooth; }
   body {
-    background: var(--background);
-    color: var(--foreground);
+    background: var(--background); color: var(--foreground);
     font-family: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
+    -webkit-font-smoothing: antialiased; min-height: 100%; display: flex; flex-direction: column;
   }
   a { color: inherit; text-decoration: none; }
   .mono { font-family: "Geist Mono", ui-monospace, monospace; }
+  h1,h2,h3 { margin: 0; }
 
-  /* ---------- Utilidades de marca ---------- */
   .wrap { width: 100%; max-width: 72rem; margin: 0 auto; padding: 0 1rem; }
   @media (min-width: 640px) { .wrap { padding: 0 1.5rem; } }
 
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
-    border: 0; cursor: pointer; font: inherit; border-radius: 999px;
-    padding: .625rem 1.25rem; font-size: .875rem; font-weight: 600;
-    transition: filter .2s, box-shadow .2s, transform .08s, background .2s;
-  }
-  .btn-primary {
-    background: linear-gradient(to right, var(--emerald-400), var(--cyan-400));
-    color: var(--slate-950);
-    box-shadow: 0 10px 25px -5px rgba(16,185,129,.2);
-  }
+  /* Botones */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; border: 0; cursor: pointer;
+    font: inherit; border-radius: 999px; padding: .625rem 1.25rem; font-size: .875rem; font-weight: 600;
+    transition: filter .2s, box-shadow .2s, transform .08s, background .2s; }
+  .btn-primary { background: linear-gradient(to right, var(--emerald-400), var(--cyan-400)); color: var(--slate-950);
+    box-shadow: 0 10px 25px -5px rgba(16,185,129,.2); }
   .btn-primary:hover { filter: brightness(1.1); box-shadow: 0 10px 25px -5px rgba(16,185,129,.3); }
   .btn-primary:active { transform: scale(.98); }
   .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
-  .btn-ghost {
-    background: rgba(255,255,255,.05); color: #fff;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.15);
-  }
+  .btn-ghost { background: rgba(255,255,255,.05); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); }
   .btn-ghost:hover { background: rgba(255,255,255,.1); }
   .btn-lg { padding: .75rem 1.5rem; font-size: 1rem; }
 
-  .grid-bg {
-    background-image:
+  .grid-bg { background-image:
       linear-gradient(to right, rgba(148,163,184,.06) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(148,163,184,.06) 1px, transparent 1px);
     background-size: 56px 56px;
     -webkit-mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 75%);
-    mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 75%);
-  }
-  .text-gradient {
-    background: linear-gradient(to right, var(--emerald-300), var(--teal-200), var(--cyan-300));
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
+    mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 75%); }
+  .text-gradient { background: linear-gradient(to right, var(--emerald-300), var(--teal-200), var(--cyan-300));
+    -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .eyebrow-pill { display: inline-flex; align-items: center; gap: .5rem; font-size: .8rem; font-weight: 500; color: var(--emerald-300);
+    background: rgba(255,255,255,.05); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); padding: .25rem .75rem; border-radius: 999px; }
+  .eyebrow-pill .dot { height: .375rem; width: .375rem; border-radius: 999px; background: var(--emerald-400); animation: pulse 2s infinite; }
+  @keyframes pulse { 50% { opacity: .4; } }
 
-  /* ---------- Header ---------- */
-  header.site {
-    position: sticky; top: 0; z-index: 40;
-    border-bottom: 1px solid rgba(255,255,255,.05);
-    background: rgba(5,8,16,.7); backdrop-filter: blur(16px);
-  }
+  .animate-float { animation: float 6s ease-in-out infinite; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  .animate-scan { animation: scan 2.4s ease-in-out infinite; }
+  @keyframes scan { 0% { top: -15%; } 50% { top: 100%; } 100% { top: -15%; } }
+
+  /* Header */
+  header.site { position: sticky; top: 0; z-index: 40; border-bottom: 1px solid rgba(255,255,255,.05);
+    background: rgba(5,8,16,.7); backdrop-filter: blur(16px); }
   header .bar { display: flex; height: 4rem; align-items: center; justify-content: space-between; }
   .logo { display: inline-flex; align-items: center; gap: .625rem; }
-  .logo .mark {
-    display: grid; place-items: center; height: 2.25rem; width: 2.25rem; border-radius: .75rem;
-    background: linear-gradient(135deg, var(--emerald-400), var(--cyan-500));
-    color: var(--slate-950); box-shadow: 0 10px 20px -5px rgba(16,185,129,.25);
-  }
+  .logo .mark { display: grid; place-items: center; height: 2.25rem; width: 2.25rem; border-radius: .75rem;
+    background: linear-gradient(135deg, var(--emerald-400), var(--cyan-500)); color: var(--slate-950); box-shadow: 0 10px 20px -5px rgba(16,185,129,.25); }
   .logo .name { font-size: 1.125rem; font-weight: 600; letter-spacing: -.01em; color: #fff; }
   .nav { display: none; gap: 2rem; font-size: .875rem; color: var(--slate-400); }
   @media (min-width: 768px) { .nav { display: flex; align-items: center; } }
   .nav a:hover { color: #fff; }
 
-  /* ---------- Hero / encabezado del módulo ---------- */
-  .module { position: relative; overflow: hidden; }
-  .module .glow {
-    pointer-events: none; position: absolute; top: -10rem; left: 50%; transform: translateX(-50%);
-    height: 520px; width: 820px; border-radius: 999px; background: rgba(16,185,129,.1); filter: blur(100px);
-  }
-  .module .inner { position: relative; padding: 2.5rem 0 1rem; }
-  @media (min-width: 1024px) { .module .inner { padding: 3.5rem 0 1rem; } }
-  .eyebrow { display: inline-flex; align-items: center; gap: .5rem; font-size: .8rem; font-weight: 500; color: var(--emerald-300);
-    background: rgba(255,255,255,.05); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1);
-    padding: .25rem .75rem; border-radius: 999px; }
-  .eyebrow .dot { height: .375rem; width: .375rem; border-radius: 999px; background: var(--emerald-400); animation: pulse 2s infinite; }
-  @keyframes pulse { 50% { opacity: .4; } }
-  h1.title { margin: 1.25rem 0 0; font-size: 2rem; font-weight: 600; line-height: 1.1; letter-spacing: -.02em; color: #fff; }
-  @media (min-width: 640px) { h1.title { font-size: 2.75rem; } }
-  p.lede { margin: 1rem 0 0; max-width: 40rem; font-size: 1.05rem; color: var(--slate-400); }
-
-  .tips { display: grid; gap: .75rem; margin-top: 1.75rem; grid-template-columns: 1fr 1fr; }
-  @media (min-width: 768px) { .tips { grid-template-columns: repeat(4, 1fr); } }
-  .tip { display: flex; align-items: flex-start; gap: .625rem; border-radius: 1rem; padding: .875rem;
-    background: rgba(255,255,255,.03); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); font-size: .82rem; color: var(--slate-400); }
-  .tip svg { color: var(--emerald-300); flex: none; width: 1.1rem; height: 1.1rem; margin-top: .05rem; }
-
-  /* ---------- Módulo facial ---------- */
   main { flex: 1; }
-  .stage-wrap { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; padding: 2.5rem 0 4rem; }
-  .stage {
-    position: relative; width: 100%; max-width: 380px; aspect-ratio: 3/4; overflow: hidden;
-    border-radius: 2.25rem; background: var(--slate-950);
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 25px 50px -12px rgba(16,185,129,.05);
-  }
+  section { position: relative; }
+
+  /* Hero */
+  .hero-grid { position: relative; display: grid; align-items: center; gap: 3.5rem; max-width: 72rem; margin: 0 auto;
+    padding: 3.5rem 1rem 5rem; }
+  @media (min-width: 640px) { .hero-grid { padding-left: 1.5rem; padding-right: 1.5rem; } }
+  @media (min-width: 1024px) { .hero-grid { grid-template-columns: 1.1fr 1fr; padding-top: 6rem; } }
+  .hero-blur { pointer-events: none; position: absolute; top: -10rem; left: 50%; transform: translateX(-50%);
+    height: 520px; width: 820px; border-radius: 999px; background: rgba(16,185,129,.1); filter: blur(100px); }
+  h1.hero { margin-top: 1.5rem; font-size: 2.25rem; font-weight: 600; line-height: 1.08; letter-spacing: -.02em; color: #fff; }
+  @media (min-width: 640px) { h1.hero { font-size: 3.75rem; } }
+  p.lede { margin-top: 1.5rem; max-width: 36rem; font-size: 1.125rem; color: var(--slate-400); }
+  .hero-btns { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: .75rem; }
+  .hero-checks { margin: 2.5rem 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; font-size: .875rem; color: var(--slate-400); }
+  .hero-checks li { display: flex; align-items: center; gap: .5rem; }
+  .hero-checks svg { color: var(--emerald-400); width: 1rem; height: 1rem; }
+
+  /* Visual del teléfono */
+  .visual { position: relative; width: 100%; max-width: 420px; margin: 0 auto; }
+  .visual .halo { position: absolute; inset: 2rem; border-radius: 999px; background: rgba(6,182,212,.2); filter: blur(60px); }
+  .phone { position: relative; width: 280px; margin: 0 auto; border-radius: 2.75rem; border: 1px solid rgba(255,255,255,.15);
+    background: var(--slate-900); padding: .625rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,.6); }
+  .phone-screen { position: relative; aspect-ratio: 9/19; overflow: hidden; border-radius: 2.25rem;
+    background: linear-gradient(to bottom, var(--slate-800), var(--slate-950)); }
+  .notch { position: absolute; left: 50%; top: .625rem; height: 1.25rem; width: 5rem; transform: translateX(-50%); border-radius: 999px; background: #000; }
+  .screen-label { position: absolute; inset-inline: 0; top: 3rem; text-align: center; font-size: .69rem; font-weight: 500; text-transform: uppercase; letter-spacing: .15em; color: var(--slate-400); }
+  .phone svg.face { position: absolute; left: 50%; top: 22%; width: 78%; transform: translateX(-50%); }
+  .phone .scanmask { position: absolute; inset-inline: 11%; top: 22%; height: 47%; overflow: hidden; border-radius: 50%; }
+  .phone .scanmask > div { position: absolute; inset-inline: 0; height: 3rem; background: linear-gradient(to bottom, transparent, rgba(110,231,183,.25), transparent); }
+  .phone-card { position: absolute; inset-inline: 1.25rem; bottom: 2rem; display: flex; align-items: center; gap: .75rem;
+    border-radius: 1rem; background: rgba(255,255,255,.05); padding: .75rem; box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); backdrop-filter: blur(6px); }
+  .phone-card .ic { display: grid; place-items: center; height: 2.5rem; width: 2.5rem; border-radius: .75rem;
+    background: linear-gradient(135deg, var(--emerald-400), var(--cyan-500)); color: var(--slate-950); }
+  .phone-card .k { font-size: .62rem; text-transform: uppercase; letter-spacing: .08em; color: var(--slate-400); margin: 0; }
+  .phone-card .v { font-size: .875rem; font-weight: 600; color: #fff; margin: 0; }
+  .phone-card .pbar { margin-top: .25rem; height: .25rem; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.1); }
+  .phone-card .pbar > div { height: 100%; width: 66%; border-radius: 999px; background: var(--emerald-400); }
+  .float-card { position: absolute; display: flex; align-items: center; gap: .625rem; border-radius: 1rem;
+    background: rgba(15,23,42,.9); padding: .625rem .875rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.1); backdrop-filter: blur(6px); }
+  .float-card .b { display: grid; place-items: center; height: 2rem; width: 2rem; border-radius: 999px; }
+  .float-card p { margin: 0; }
+  .fc-1 { left: -.5rem; top: 4rem; } @media (min-width:640px){ .fc-1 { left: -2.5rem; } }
+  .fc-2 { right: -.5rem; top: 50%; animation-delay: 1.5s; } @media (min-width:640px){ .fc-2 { right: -2rem; } }
+  .fc-3 { bottom: -1rem; left: 1rem; animation-delay: 3s; box-shadow: 0 20px 25px -5px rgba(0,0,0,.5), inset 0 0 0 1px rgba(52,211,153,.3); }
+  @media (min-width:640px){ .fc-3 { left: -1rem; } }
+
+  /* Stats */
+  .stats { border-top: 1px solid rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.05); background: rgba(255,255,255,.015); }
+  .stats .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; max-width: 72rem; margin: 0 auto; padding: 2.5rem 1rem; }
+  @media (min-width: 640px) { .stats .grid { padding-left: 1.5rem; padding-right: 1.5rem; } }
+  @media (min-width: 768px) { .stats .grid { grid-template-columns: repeat(4, 1fr); } }
+  .stats .n { font-size: 1.875rem; font-weight: 600; color: #fff; margin: 0; }
+  .stats .l { font-size: .875rem; color: var(--slate-500); margin: .25rem 0 0; }
+
+  /* Section heading */
+  .sec { max-width: 72rem; margin: 0 auto; padding: 6rem 1rem; scroll-margin-top: 5rem; }
+  @media (min-width: 640px) { .sec { padding-left: 1.5rem; padding-right: 1.5rem; } }
+  .sec-band { border-top: 1px solid rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.05); background: rgba(255,255,255,.015); }
+  .head { max-width: 42rem; margin: 0 auto; text-align: center; }
+  .head.left { margin: 0; max-width: 36rem; text-align: left; }
+  .head .eye { font-size: .875rem; font-weight: 500; color: var(--emerald-300); margin: 0; }
+  .head h2 { margin-top: .5rem; font-size: 1.875rem; font-weight: 600; letter-spacing: -.02em; color: #fff; }
+  @media (min-width: 640px) { .head h2 { font-size: 2.25rem; } }
+  .head p { margin-top: 1rem; color: var(--slate-400); }
+
+  /* Módulos */
+  .mods { margin-top: 3.5rem; display: grid; gap: 1.25rem; }
+  @media (min-width: 1024px) { .mods { grid-template-columns: repeat(3, 1fr); } }
+  .mod { position: relative; display: flex; flex-direction: column; border-radius: 1.5rem; padding: 1.5rem; cursor: pointer;
+    background: rgba(255,255,255,.03); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); transition: transform .3s, box-shadow .3s; }
+  .mod:hover { transform: translateY(-4px); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+  .mod.featured { background: linear-gradient(to bottom, rgba(52,211,153,.1), rgba(34,211,238,.03)); box-shadow: inset 0 0 0 1px rgba(52,211,153,.3); }
+  .mod.featured:hover { box-shadow: inset 0 0 0 1px rgba(52,211,153,.6); }
+  .reco { position: absolute; right: 1.25rem; top: 1.25rem; border-radius: 999px; background: var(--emerald-400); color: var(--slate-950);
+    padding: .125rem .625rem; font-size: .69rem; font-weight: 600; }
+  .mod .sq { display: grid; place-items: center; height: 3rem; width: 3rem; border-radius: 1rem;
+    background: linear-gradient(135deg, var(--emerald-400), var(--cyan-500)); color: var(--slate-950); }
+  .mod .tag { margin: 1.5rem 0 0; font-size: .72rem; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; color: var(--slate-500); }
+  .mod h3 { margin: .25rem 0 0; font-size: 1.25rem; font-weight: 600; color: #fff; }
+  .mod .mtext { margin: .5rem 0 0; font-size: .875rem; color: var(--slate-400); }
+  .mod ul { margin: 1.25rem 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: .5rem; font-size: .875rem; color: #cbd5e1; }
+  .mod ul li { display: flex; align-items: center; gap: .5rem; }
+  .mod ul svg { color: var(--emerald-400); width: 1rem; height: 1rem; flex: none; }
+  .mod .go { margin-top: auto; padding-top: 2rem; display: flex; align-items: center; gap: .375rem; font-size: .875rem; font-weight: 500; color: var(--emerald-300); }
+  .mod:hover .go svg { transform: translateX(4px); }
+  .mod .go svg { transition: transform .2s; }
+  .mod .live { margin-left: .4rem; font-size: .62rem; text-transform: uppercase; letter-spacing: .06em; color: var(--slate-500); }
+
+  /* Cómo funciona */
+  .steps { position: relative; margin-top: 4rem; display: grid; gap: 2.5rem; }
+  @media (min-width: 768px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+  .steps .line { display: none; position: absolute; left: 0; right: 0; top: 1.75rem; height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,.15), transparent); }
+  @media (min-width: 768px) { .steps .line { display: block; } }
+  .step { position: relative; text-align: center; }
+  .step .sq { position: relative; margin: 0 auto; display: grid; place-items: center; height: 3.5rem; width: 3.5rem; border-radius: 1rem;
+    background: #0a0f1c; color: var(--emerald-300); box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); }
+  .step .num { position: absolute; right: -.5rem; top: -.5rem; display: grid; place-items: center; height: 1.5rem; width: 1.5rem;
+    border-radius: 999px; background: var(--emerald-400); color: var(--slate-950); font-size: .75rem; font-weight: 700; }
+  .step h3 { margin-top: 1.5rem; font-size: 1.125rem; font-weight: 600; color: #fff; }
+  .step p { margin: .5rem auto 0; max-width: 18rem; font-size: .875rem; color: var(--slate-400); }
+
+  /* Seguridad */
+  .sec2 { display: grid; align-items: center; gap: 3.5rem; }
+  @media (min-width: 1024px) { .sec2 { grid-template-columns: 1fr 1fr; } }
+  .techs { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: .75rem; font-size: .75rem; color: #cbd5e1; }
+  .techs span { display: flex; align-items: center; gap: .5rem; border-radius: 999px; background: rgba(255,255,255,.05);
+    padding: .375rem .75rem; box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
+  .techs svg { color: var(--emerald-300); width: .9rem; height: .9rem; }
+  .seccards { display: grid; gap: 1rem; }
+  @media (min-width: 640px) { .seccards { grid-template-columns: 1fr 1fr; } }
+  .seccard { border-radius: 1rem; padding: 1.25rem; background: rgba(255,255,255,.03); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
+  .seccard svg { color: var(--emerald-300); width: 1.25rem; height: 1.25rem; }
+  .seccard h3 { margin-top: 1rem; font-size: 1rem; font-weight: 600; color: #fff; }
+  .seccard p { margin: .375rem 0 0; font-size: .875rem; color: var(--slate-400); }
+
+  /* CTA */
+  .cta { position: relative; overflow: hidden; border-radius: 2rem; padding: 2.5rem; text-align: center;
+    background: linear-gradient(135deg, rgba(52,211,153,.15), rgba(45,212,191,.05), rgba(34,211,238,.15)); box-shadow: inset 0 0 0 1px rgba(52,211,153,.2); }
+  @media (min-width: 640px) { .cta { padding: 4rem; } }
+  .cta svg.sh { position: relative; margin: 0 auto; color: var(--emerald-300); width: 3rem; height: 3rem; }
+  .cta h2 { position: relative; margin-top: 1.25rem; font-size: 1.875rem; font-weight: 600; letter-spacing: -.02em; color: #fff; }
+  @media (min-width: 640px) { .cta h2 { font-size: 2.25rem; } }
+  .cta p { position: relative; margin: .75rem auto 0; max-width: 32rem; color: #cbd5e1; }
+
+  /* ===== Módulo facial ===== */
+  .stage-wrap { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+  .stage { position: relative; width: 100%; max-width: 380px; aspect-ratio: 3/4; overflow: hidden; border-radius: 2.25rem;
+    background: var(--slate-950); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 25px 50px -12px rgba(16,185,129,.05); }
   video, canvas.mesh, img.preview { position: absolute; inset: 0; width: 100%; height: 100%; }
   video { object-fit: cover; transform: scaleX(-1); }
   canvas.mesh { pointer-events: none; }
   img.preview { object-fit: cover; }
   svg.oval { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-
   .scanwrap { position: absolute; left: 14%; right: 14%; top: 14%; bottom: 19%; overflow: hidden; border-radius: 50%; pointer-events: none; }
-  .scanwrap .scan { position: absolute; left: 0; right: 0; height: 4rem;
-    background: linear-gradient(to bottom, transparent, rgba(52,211,153,.2), transparent); animation: scan 2.4s ease-in-out infinite; }
-  @keyframes scan { 0% { top: -15%; } 50% { top: 100%; } 100% { top: -15%; } }
-
-  .msg { position: absolute; left: 1rem; right: 1rem; top: 1rem; text-align: center;
-    border-radius: 1rem; padding: .625rem 1rem; font-size: .875rem; font-weight: 500; backdrop-filter: blur(8px); }
+  .scanwrap .scan { position: absolute; left: 0; right: 0; height: 4rem; background: linear-gradient(to bottom, transparent, rgba(52,211,153,.2), transparent); animation: scan 2.4s ease-in-out infinite; }
+  .msg { position: absolute; left: 1rem; right: 1rem; top: 1rem; text-align: center; border-radius: 1rem; padding: .625rem 1rem; font-size: .875rem; font-weight: 500; backdrop-filter: blur(8px); }
   .msg.neutral { background: rgba(255,255,255,.1); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); }
   .msg.ok { background: rgba(52,211,153,.15); color: var(--emerald-300); box-shadow: inset 0 0 0 1px rgba(110,231,183,.3); }
   .msg.warn { background: rgba(251,191,36,.15); color: var(--amber-200); box-shadow: inset 0 0 0 1px rgba(252,211,77,.3); }
-
-  .notice { position: absolute; left: 1.5rem; right: 1.5rem; top: 4.5rem; text-align: center;
-    border-radius: .75rem; padding: .5rem .75rem; font-size: .75rem; font-weight: 500; color: var(--amber-200);
-    background: rgba(15,23,42,.8); box-shadow: inset 0 0 0 1px rgba(252,211,77,.3); backdrop-filter: blur(8px); }
-
-  .challenge { position: absolute; left: 1.5rem; right: 1.5rem; bottom: 1.25rem; display: flex; align-items: center; gap: .75rem;
-    border-radius: 1rem; padding: .75rem; background: rgba(15,23,42,.8); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); backdrop-filter: blur(8px); }
-  .challenge .icon { display: grid; place-items: center; height: 3rem; width: 3rem; flex: none; border-radius: .75rem;
+  .notice { position: absolute; left: 1.5rem; right: 1.5rem; top: 4.5rem; text-align: center; border-radius: .75rem; padding: .5rem .75rem;
+    font-size: .75rem; font-weight: 500; color: var(--amber-200); background: rgba(15,23,42,.8); box-shadow: inset 0 0 0 1px rgba(252,211,77,.3); backdrop-filter: blur(8px); }
+  .challenge { position: absolute; left: 1.5rem; right: 1.5rem; bottom: 1.25rem; display: flex; align-items: center; gap: .75rem; border-radius: 1rem;
+    padding: .75rem; background: rgba(15,23,42,.8); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); backdrop-filter: blur(8px); }
+  .challenge .cicon { display: grid; place-items: center; height: 3rem; width: 3rem; flex: none; border-radius: .75rem;
     background: linear-gradient(135deg, var(--emerald-400), var(--cyan-500)); color: var(--slate-950); }
-  .challenge .kicker { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--slate-400); }
-  .challenge .label { font-weight: 600; color: #fff; }
+  .challenge .kicker { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--slate-400); margin: 0; }
+  .challenge .label { font-weight: 600; color: #fff; margin: 0; }
   .countbar { margin-top: .4rem; height: .25rem; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.1); }
   .countbar > span { display: block; height: 100%; border-radius: 999px; background: var(--emerald-400); width: 100%; }
   .countbar.run > span { animation: countdown linear forwards; }
   @keyframes countdown { to { width: 0%; } }
-
-  .anim-left { animation: nudgeL 1.2s ease-in-out infinite; }
-  .anim-right { animation: nudgeR 1.2s ease-in-out infinite; }
-  .anim-blink { animation: blink 1.2s ease-in-out infinite; }
-  .anim-pop { animation: pop 1.2s ease-in-out infinite; }
-  @keyframes nudgeL { 50% { transform: translateX(-5px); } }
-  @keyframes nudgeR { 50% { transform: translateX(5px); } }
-  @keyframes blink { 50% { transform: scaleY(.1); } }
-  @keyframes pop { 50% { transform: scale(1.15); } }
-
-  /* Capas que cubren la cámara (intro / loading / error / done) */
-  .cover { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 1.25rem; padding: 2rem; text-align: center; background: rgba(2,6,23,.9); backdrop-filter: blur(4px); }
+  .anim-left { animation: nudgeL 1.2s ease-in-out infinite; } .anim-right { animation: nudgeR 1.2s ease-in-out infinite; }
+  .anim-blink { animation: blinkA 1.2s ease-in-out infinite; } .anim-pop { animation: popA 1.2s ease-in-out infinite; }
+  @keyframes nudgeL { 50% { transform: translateX(-5px); } } @keyframes nudgeR { 50% { transform: translateX(5px); } }
+  @keyframes blinkA { 50% { transform: scaleY(.1); } } @keyframes popA { 50% { transform: scale(1.15); } }
+  .cover { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem;
+    padding: 2rem; text-align: center; background: rgba(2,6,23,.9); backdrop-filter: blur(4px); }
   .cover.hidden { display: none; }
-  .cover h3 { margin: 0; font-size: 1.125rem; font-weight: 600; color: #fff; }
+  .cover h3 { font-size: 1.125rem; font-weight: 600; color: #fff; }
   .cover p { margin: .25rem 0 0; font-size: .875rem; color: var(--slate-400); }
-  .ping { position: relative; }
+  .ping { position: relative; margin: 0 auto; width: 5rem; height: 5rem; }
   .ping .ring { position: absolute; inset: 0; border-radius: 999px; background: rgba(52,211,153,.2); animation: ping 1.3s cubic-bezier(0,0,.2,1) infinite; }
   @keyframes ping { 75%, 100% { transform: scale(1.8); opacity: 0; } }
   .ping .core { position: relative; display: grid; place-items: center; height: 5rem; width: 5rem; border-radius: 999px;
     background: linear-gradient(135deg, var(--emerald-400), var(--cyan-500)); color: var(--slate-950); }
-  .err-ic { display: grid; place-items: center; height: 4rem; width: 4rem; border-radius: 999px;
+  .err-ic { display: grid; place-items: center; height: 4rem; width: 4rem; border-radius: 999px; margin: 0 auto;
     background: rgba(244,63,94,.15); color: var(--rose-300); box-shadow: inset 0 0 0 1px rgba(251,113,133,.3); }
-
-  .progress { width: 100%; max-width: 15rem; height: .4rem; border-radius: 999px; background: rgba(255,255,255,.1); overflow: hidden; }
-  .progress > span { display: block; height: 100%; width: 0; border-radius: 999px;
-    background: linear-gradient(to right, var(--emerald-400), var(--cyan-400)); transition: width .3s; }
-
-  .done-cover { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-    gap: .25rem; padding: 1.5rem; background: linear-gradient(to top, var(--slate-950), rgba(2,6,23,.3) 50%, transparent); }
+  .progress { width: 100%; max-width: 15rem; height: .4rem; border-radius: 999px; background: rgba(255,255,255,.1); overflow: hidden; margin: 0 auto; }
+  .progress > span { display: block; height: 100%; width: 0; border-radius: 999px; background: linear-gradient(to right, var(--emerald-400), var(--cyan-400)); transition: width .3s; }
+  .done-cover { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: .25rem;
+    padding: 1.5rem; background: linear-gradient(to top, var(--slate-950), rgba(2,6,23,.3) 50%, transparent); }
   .done-cover.hidden { display: none; }
   .done-badge { margin-bottom: .75rem; display: grid; place-items: center; height: 3.5rem; width: 3.5rem; border-radius: 999px;
     background: var(--emerald-400); color: var(--slate-950); box-shadow: 0 10px 20px -5px rgba(16,185,129,.4); animation: popin .4s cubic-bezier(.2,1.2,.3,1); }
   @keyframes popin { from { transform: scale(0); } }
-
-  /* Lista de acciones */
   ol.actions { display: flex; gap: .5rem; width: 100%; max-width: 380px; margin: 0; padding: 0; list-style: none; }
-  ol.actions li { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .375rem; text-align: center;
-    border-radius: 1rem; padding: .75rem .5rem; font-size: .75rem; transition: background .2s, color .2s, box-shadow .2s; }
+  ol.actions li { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .375rem; text-align: center; border-radius: 1rem;
+    padding: .75rem .5rem; font-size: .75rem; transition: background .2s, color .2s, box-shadow .2s; }
   ol.actions li.pending { background: rgba(255,255,255,.03); color: var(--slate-500); box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); }
   ol.actions li.active { background: rgba(255,255,255,.1); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
   ol.actions li.done { background: rgba(52,211,153,.1); color: var(--emerald-300); box-shadow: inset 0 0 0 1px rgba(52,211,153,.3); }
   ol.actions li svg { width: 1rem; height: 1rem; }
+  .alert { display: none; align-items: flex-start; gap: .625rem; border-radius: 1rem; padding: .875rem 1rem; font-size: .85rem; max-width: 380px;
+    background: rgba(255,255,255,.03); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); color: var(--slate-400); }
+  .alert.show { display: flex; }
+  .alert svg { flex: none; width: 1.1rem; height: 1.1rem; color: var(--cyan-300); margin-top: .05rem; }
 
   /* Resultado */
-  .result { display: none; width: 100%; max-width: 42rem; margin: 0 auto; flex-direction: column; gap: 1.25rem; padding: 2.5rem 0 4rem; }
+  .result { display: none; width: 100%; max-width: 42rem; margin: 2rem auto 0; flex-direction: column; gap: 1.25rem; }
   .result.show { display: flex; }
   .banner { display: flex; align-items: center; gap: 1rem; border-radius: 1rem; padding: 1rem; background: rgba(52,211,153,.1); box-shadow: inset 0 0 0 1px rgba(52,211,153,.25); }
   .banner .ic { display: grid; place-items: center; height: 2.75rem; width: 2.75rem; flex: none; border-radius: 999px; background: var(--emerald-400); color: var(--slate-950); }
-  .banner.err { background: rgba(244,63,94,.1); box-shadow: inset 0 0 0 1px rgba(244,63,94,.25); }
-  .banner.err .ic { background: var(--rose-300); }
   .banner p.t { margin: 0; font-weight: 600; color: #fff; }
   .banner p.s { margin: 0; font-size: .875rem; color: rgba(209,250,229,.7); }
   .result-grid { display: grid; gap: 1.25rem; grid-template-columns: 1fr; }
@@ -224,120 +292,244 @@
   .stat .v { margin: .1rem 0 0; font-weight: 500; color: #fff; }
   .actions-row { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .75rem; }
 
-  .alert { display: none; align-items: flex-start; gap: .625rem; border-radius: 1rem; padding: .875rem 1rem; font-size: .85rem;
-    background: rgba(255,255,255,.03); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); color: var(--slate-400); max-width: 380px; }
-  .alert.show { display: flex; }
-  .alert svg { flex: none; width: 1.1rem; height: 1.1rem; color: var(--cyan-300); margin-top: .05rem; }
-
   footer.site { margin-top: auto; border-top: 1px solid rgba(255,255,255,.05); }
-  footer .bar { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 1rem;
-    padding: 2rem 0; font-size: .875rem; color: var(--slate-500); }
+  footer .bar { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 1rem; padding: 2rem 0; font-size: .875rem; color: var(--slate-500); }
   @media (min-width: 640px) { footer .bar { flex-direction: row; } }
 </style>
 </head>
 <body>
-  <!-- ============ HEADER ============ -->
+  <!-- ======================= HEADER ======================= -->
   <header class="site">
     <div class="wrap bar">
-      <span class="logo">
-        <span class="mark" data-icon="shield" data-stroke="2.5"></span>
-        <span class="name">Veridia</span>
-      </span>
+      <a class="logo" href="#top"><span class="mark" data-icon="shield" data-stroke="2.5"></span><span class="name">Veridia</span></a>
       <nav class="nav">
-        <a href="#">Módulos</a>
-        <a href="#">Cómo funciona</a>
-        <a href="#">Seguridad</a>
+        <a href="#modulos">Módulos</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#seguridad">Seguridad</a>
       </nav>
-      <button class="btn btn-primary" style="padding:.5rem 1rem" id="topBtn">Verificar identidad</button>
+      <a href="#verificar" class="btn btn-primary" style="padding:.5rem 1rem">Verificar identidad</a>
     </div>
   </header>
 
-  <main>
-    <!-- ============ ENCABEZADO DEL MÓDULO ============ -->
-    <section class="module">
+  <main id="top">
+    <!-- ======================= HERO ======================= -->
+    <section>
       <div class="grid-bg" style="position:absolute;inset:0;pointer-events:none"></div>
-      <div class="glow"></div>
-      <div class="wrap inner">
-        <span class="eyebrow"><span class="dot"></span>Módulo 01 · Biometría facial</span>
-        <h1 class="title">Reconocimiento facial con <span class="text-gradient">prueba de vida</span></h1>
-        <p class="lede">Como en tu app bancaria: ubica tu rostro en el óvalo y realiza acciones aleatorias
-          para demostrar que eres una persona real. Todo se procesa en tu navegador; ninguna imagen se envía ni se guarda.</p>
-        <div class="tips">
-          <div class="tip"><span data-icon="bulb"></span><span>Busca buena luz frontal, evita contraluz.</span></div>
-          <div class="tip"><span data-icon="scan"></span><span>Retira gafas oscuras, gorra o tapabocas.</span></div>
-          <div class="tip"><span data-icon="eye"></span><span>Mantén la cámara a la altura de los ojos.</span></div>
-          <div class="tip"><span data-icon="smile"></span><span>Realiza cada acción de forma natural y pausada.</span></div>
+      <div class="hero-blur"></div>
+      <div class="hero-grid">
+        <div>
+          <span class="eyebrow-pill"><span class="dot"></span>Verificación biométrica en el navegador</span>
+          <h1 class="hero">Verifica identidades <span class="text-gradient">en segundos</span>, con la seguridad de un banco.</h1>
+          <p class="lede">Reconocimiento facial con prueba de vida, escaneo inteligente de documentos y validación rostro-documento.
+            Sin instalaciones, sin servidores, sin fricción.</p>
+          <div class="hero-btns">
+            <a href="#verificar" class="btn btn-primary btn-lg">Iniciar verificación <span data-icon="arrow-right" data-size="16"></span></a>
+            <a href="#modulos" class="btn btn-ghost btn-lg">Explorar módulos</a>
+          </div>
+          <ul class="hero-checks">
+            <li><span data-icon="check" data-size="16"></span> Sin instalar apps</li>
+            <li><span data-icon="check" data-size="16"></span> Procesamiento local</li>
+            <li><span data-icon="check" data-size="16"></span> Compatible con móvil</li>
+          </ul>
+        </div>
+
+        <!-- Visual del teléfono -->
+        <div class="visual">
+          <div class="halo"></div>
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="notch"></div>
+              <p class="screen-label">Verificación facial</p>
+              <svg class="face" viewBox="0 0 200 260">
+                <defs><linearGradient id="ring" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs>
+                <ellipse cx="100" cy="125" rx="78" ry="104" fill="rgba(255,255,255,0.03)"/>
+                <ellipse cx="100" cy="125" rx="78" ry="104" fill="none" stroke="url(#ring)" stroke-width="4" stroke-dasharray="420 600" stroke-linecap="round"/>
+                <g fill="rgba(94,234,212,0.7)" id="faceDots"></g>
+              </svg>
+              <div class="scanmask"><div class="animate-scan"></div></div>
+              <div class="phone-card">
+                <span class="ic" data-icon="smile" data-size="20"></span>
+                <div style="flex:1">
+                  <p class="k">Acción 2 de 3</p>
+                  <p class="v">Sonríe</p>
+                  <div class="pbar"><div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="float-card fc-1 animate-float">
+            <span class="b" style="background:rgba(52,211,153,.15);color:var(--emerald-300)" data-icon="eye" data-size="16"></span>
+            <div><p style="font-size:.75rem;font-weight:600;color:#fff">Prueba de vida</p><p style="font-size:.69rem;color:var(--emerald-300)">Superada</p></div>
+          </div>
+          <div class="float-card fc-2 animate-float">
+            <span class="b" style="background:rgba(34,211,238,.15);color:var(--cyan-300)" data-icon="credit-card" data-size="16"></span>
+            <div><p style="font-size:.75rem;font-weight:600;color:#fff">Documento</p><p style="font-size:.69rem;color:var(--cyan-300)">Foto detectada</p></div>
+          </div>
+          <div class="float-card fc-3 animate-float">
+            <span style="color:var(--emerald-300)" data-icon="shield" data-size="24"></span>
+            <div><p style="font-size:.75rem;color:var(--slate-400)">Coincidencia</p><p style="font-size:1.125rem;font-weight:700;color:#fff">97.8%</p></div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- ============ MÓDULO FACIAL ============ -->
-    <div class="wrap">
-      <div class="stage-wrap" id="module">
+    <!-- ======================= STATS ======================= -->
+    <section class="stats">
+      <div class="grid">
+        <div style="text-align:center"><p class="n">&lt; 45 s</p><p class="l">Onboarding completo</p></div>
+        <div style="text-align:center"><p class="n">68</p><p class="l">Puntos faciales rastreados</p></div>
+        <div style="text-align:center"><p class="n">128-D</p><p class="l">Vector biométrico</p></div>
+        <div style="text-align:center"><p class="n">0 bytes</p><p class="l">Enviados a servidores</p></div>
+      </div>
+    </section>
+
+    <!-- ======================= MÓDULOS ======================= -->
+    <section id="modulos" class="sec">
+      <div class="head">
+        <p class="eye">Módulos</p>
+        <h2>Tres herramientas, un flujo de confianza</h2>
+        <p>Úsalos por separado o combínalos en un onboarding completo.</p>
+      </div>
+      <div class="mods">
+        <a href="#verificar" class="mod">
+          <span class="sq" data-icon="scan" data-size="24"></span>
+          <p class="tag">Módulo 01 <span class="live">· activo aquí</span></p>
+          <h3>Reconocimiento facial</h3>
+          <p class="mtext">Prueba de vida activa estilo banca: óvalo guía, parpadeo, giro de cabeza y sonrisa en orden aleatorio.</p>
+          <ul>
+            <li><span data-icon="check" data-size="16"></span> Retos aleatorios anti-suplantación</li>
+            <li><span data-icon="check" data-size="16"></span> Malla de 68 puntos faciales</li>
+            <li><span data-icon="check" data-size="16"></span> Plantilla biométrica 128-D</li>
+          </ul>
+          <span class="go">Probar ahora <span data-icon="arrow-right" data-size="16"></span></span>
+        </a>
+        <div class="mod" style="cursor:default">
+          <span class="sq" data-icon="credit-card" data-size="24"></span>
+          <p class="tag">Módulo 02</p>
+          <h3>Escaneo de documento</h3>
+          <p class="mtext">Captura automática del documento con control de enfoque, luz y reflejos. Extrae la foto y los datos.</p>
+          <ul>
+            <li><span data-icon="check" data-size="16"></span> Autocaptura con control de calidad</li>
+            <li><span data-icon="check" data-size="16"></span> Detección de la foto del titular</li>
+            <li><span data-icon="check" data-size="16"></span> Lectura OCR de número y nombres</li>
+          </ul>
+          <span class="go" style="color:var(--slate-500)">En la app completa</span>
+        </div>
+        <div class="mod featured" style="cursor:default">
+          <span class="reco">Recomendado</span>
+          <span class="sq" data-icon="user-check" data-size="24"></span>
+          <p class="tag">Módulo 03</p>
+          <h3>Rostro vs. documento</h3>
+          <p class="mtext">Onboarding completo: confirma que quien está frente a la cámara es el propietario del documento.</p>
+          <ul>
+            <li><span data-icon="check" data-size="16"></span> Documento + prueba de vida</li>
+            <li><span data-icon="check" data-size="16"></span> Comparación biométrica 1:1</li>
+            <li><span data-icon="check" data-size="16"></span> Reporte descargable</li>
+          </ul>
+          <span class="go" style="color:var(--slate-500)">En la app completa</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= CÓMO FUNCIONA ======================= -->
+    <section id="como-funciona" class="sec-band">
+      <div class="sec">
+        <div class="head">
+          <p class="eye">Cómo funciona</p>
+          <h2>Tan simple como tomarte una selfie</h2>
+          <p>Una experiencia guiada que cualquier persona completa sin ayuda.</p>
+        </div>
+        <ol class="steps" style="list-style:none;padding:0">
+          <div class="line"></div>
+          <li class="step">
+            <span class="sq" data-icon="credit-card" data-size="24"><span class="num">1</span></span>
+            <h3>Escanea el documento</h3>
+            <p>Captura el frente y el reverso. El marco guía detecta cuándo la imagen es nítida, bien iluminada y sin reflejos.</p>
+          </li>
+          <li class="step">
+            <span class="sq" data-icon="scan" data-size="24"><span class="num">2</span></span>
+            <h3>Demuestra que eres real</h3>
+            <p>Ubica tu rostro en el óvalo y completa 3 acciones aleatorias que una foto o video no pueden imitar.</p>
+          </li>
+          <li class="step">
+            <span class="sq" data-icon="badge-check" data-size="24"><span class="num">3</span></span>
+            <h3>Obtén el veredicto</h3>
+            <p>Comparamos la foto del documento con tu rostro en vivo y calculamos el porcentaje de similitud.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ======================= SEGURIDAD ======================= -->
+    <section id="seguridad" class="sec">
+      <div class="sec2">
+        <div>
+          <div class="head left">
+            <p class="eye">Seguridad</p>
+            <h2>Diseñado para frenar el fraude de identidad</h2>
+            <p>Combinamos visión por computador e IA ejecutada localmente para detectar suplantaciones y proteger la privacidad de tus usuarios.</p>
+          </div>
+          <div class="techs">
+            <span><span data-icon="cpu" data-size="14"></span> TensorFlow.js + WebGL</span>
+            <span><span data-icon="scan-line" data-size="14"></span> OCR Tesseract</span>
+            <span><span data-icon="zap" data-size="14"></span> Tiempo real</span>
+          </div>
+        </div>
+        <div class="seccards">
+          <div class="seccard"><span data-icon="eye" data-size="20"></span><h3>Prueba de vida activa</h3><p>Retos aleatorios en cada sesión que impiden ataques con fotos impresas o pantallas.</p></div>
+          <div class="seccard"><span data-icon="lock" data-size="20"></span><h3>Privacidad por diseño</h3><p>Las imágenes nunca salen de tu dispositivo. Todo el análisis se ejecuta en el navegador.</p></div>
+          <div class="seccard"><span data-icon="focus" data-size="20"></span><h3>Control de calidad</h3><p>Medimos nitidez, brillo y reflejos en tiempo real antes de aceptar una captura.</p></div>
+          <div class="seccard"><span data-icon="fingerprint" data-size="20"></span><h3>Biometría 1:1</h3><p>Redes neuronales generan vectores faciales comparables con distancia euclidiana.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= MÓDULO FACIAL EN VIVO ======================= -->
+    <section id="verificar" class="sec" style="scroll-margin-top:5rem">
+      <div class="head">
+        <p class="eye">Módulo 01 · Biometría facial</p>
+        <h2>Verificación facial con prueba de vida</h2>
+        <p>Ubica tu rostro en el óvalo y realiza las acciones aleatorias para demostrar que eres una persona real.</p>
+      </div>
+      <div class="stage-wrap" id="module" style="margin-top:2.5rem">
         <div class="stage" id="stage">
           <video id="video" autoplay playsinline muted></video>
           <canvas class="mesh" id="mesh"></canvas>
           <img class="preview" id="preview" alt="Captura" style="display:none" />
-
           <svg class="oval" viewBox="0 0 300 400" preserveAspectRatio="none">
-            <path fill-rule="evenodd" fill="rgba(3,6,14,0.78)"
-              d="M0 0h300v400H0z M150 48 a108 142 0 1 1 0 284 a108 142 0 1 1 0 -284" />
+            <path fill-rule="evenodd" fill="rgba(3,6,14,0.78)" d="M0 0h300v400H0z M150 48 a108 142 0 1 1 0 284 a108 142 0 1 1 0 -284" />
             <path d="M150 48 a108 142 0 1 1 0 284 a108 142 0 1 1 0 -284" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="4" />
-            <path id="ovalStroke" d="M150 48 a108 142 0 1 1 0 284 a108 142 0 1 1 0 -284" fill="none"
-              stroke="rgba(255,255,255,0.55)" stroke-width="4" stroke-linecap="round"
-              pathLength="100" stroke-dasharray="100 100" stroke-dashoffset="100"
-              style="transition:stroke-dashoffset .6s ease-out, stroke .4s" />
+            <path id="ovalStroke" d="M150 48 a108 142 0 1 1 0 284 a108 142 0 1 1 0 -284" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="4" stroke-linecap="round"
+              pathLength="100" stroke-dasharray="100 100" stroke-dashoffset="100" style="transition:stroke-dashoffset .6s ease-out, stroke .4s" />
           </svg>
-
           <div class="scanwrap" id="scanwrap" style="display:none"><div class="scan"></div></div>
-
           <div class="msg" id="msg" style="display:none"></div>
           <div class="notice" id="notice" style="display:none"></div>
-
           <div class="challenge" id="challenge" style="display:none">
-            <span class="icon" id="chIcon"></span>
+            <span class="cicon" id="chIcon"></span>
             <div style="min-width:0;flex:1">
               <p class="kicker" id="chKicker">Acción 1 de 3</p>
               <p class="label" id="chLabel">Parpadea</p>
               <div class="countbar" id="countbar"><span></span></div>
             </div>
           </div>
-
-          <!-- Cubiertas -->
           <div class="cover" id="cover">
-            <!-- intro -->
             <div id="introView">
-              <div class="ping" style="margin:0 auto">
-                <span class="ring"></span>
-                <span class="core" data-icon="scan" data-size="40"></span>
-              </div>
-              <div style="margin-top:1.25rem">
-                <h3>Verificación facial</h3>
-                <p>Te pediremos realizar 3 acciones simples para confirmar que eres una persona real.</p>
-              </div>
-              <button class="btn btn-primary" id="startBtn" style="margin-top:1.25rem">
-                <span data-icon="camera" data-size="16"></span> Activar cámara
-              </button>
+              <div class="ping"><span class="ring"></span><span class="core" data-icon="scan" data-size="40"></span></div>
+              <div style="margin-top:1.25rem"><h3>Verificación facial</h3><p>Te pediremos realizar 3 acciones simples para confirmar que eres una persona real.</p></div>
+              <button class="btn btn-primary" id="startBtn" style="margin-top:1.25rem"><span data-icon="camera" data-size="16"></span> Activar cámara</button>
             </div>
-            <!-- loading -->
             <div id="loadView" style="display:none;width:100%">
               <p style="font-weight:600;color:#fff;margin:0 0 1rem">Preparando la verificación</p>
               <p id="loadMsg" style="color:var(--slate-400);font-size:.875rem;margin:0 0 .75rem">Descargando modelos de IA…</p>
-              <div class="progress" style="margin:0 auto"><span id="loadBar"></span></div>
+              <div class="progress"><span id="loadBar"></span></div>
             </div>
-            <!-- error -->
             <div id="errView" style="display:none">
-              <div class="err-ic" style="margin:0 auto" data-icon="alert" data-size="32"></div>
-              <div style="margin-top:1.25rem">
-                <p style="font-weight:600;color:#fff;margin:0">No pudimos completar la verificación</p>
-                <p id="errMsg" style="color:var(--slate-400);font-size:.875rem;margin:.25rem 0 0"></p>
-              </div>
-              <button class="btn btn-primary" id="retryBtn" style="margin-top:1.25rem">
-                <span data-icon="refresh" data-size="16"></span> Reintentar
-              </button>
+              <div class="err-ic" data-icon="alert" data-size="32"></div>
+              <div style="margin-top:1.25rem"><p style="font-weight:600;color:#fff;margin:0">No pudimos completar la verificación</p><p id="errMsg" style="color:var(--slate-400);font-size:.875rem;margin:.25rem 0 0"></p></div>
+              <button class="btn btn-primary" id="retryBtn" style="margin-top:1.25rem"><span data-icon="refresh" data-size="16"></span> Reintentar</button>
             </div>
           </div>
-
           <div class="done-cover hidden" id="doneCover">
             <span class="done-badge" data-icon="check" data-size="32" data-stroke="3"></span>
             <p style="font-size:1.125rem;font-weight:600;color:#fff;margin:0">Prueba de vida superada</p>
@@ -353,46 +545,49 @@
         </div>
       </div>
 
-      <!-- ============ RESULTADO ============ -->
-      <section class="result" id="result">
+      <!-- Resultado -->
+      <div class="result" id="result">
         <div class="banner" id="banner">
-          <span class="ic" id="bannerIc" data-icon="check" data-size="24" data-stroke="3"></span>
-          <div>
-            <p class="t" id="bannerTitle">Prueba de vida superada</p>
-            <p class="s" id="bannerText">Confirmamos que hay una persona real frente a la cámara.</p>
-          </div>
+          <span class="ic" data-icon="check" data-size="24" data-stroke="3"></span>
+          <div><p class="t">Prueba de vida superada</p><p class="s">Confirmamos que hay una persona real frente a la cámara.</p></div>
         </div>
-        <div class="result-grid" id="resultGrid">
+        <div class="result-grid">
           <img class="shot" id="shot" alt="Selfie" />
-          <div class="panel">
-            <p class="kicker">Resultado del análisis</p>
-            <div id="stats"></div>
-          </div>
+          <div class="panel"><p class="kicker">Resultado del análisis</p><div id="stats"></div></div>
         </div>
         <div class="actions-row">
           <button class="btn btn-ghost" id="againBtn"><span data-icon="refresh" data-size="16"></span> Repetir</button>
           <button class="btn btn-primary" id="downloadBtn">Descargar reporte <span data-icon="arrow-right" data-size="16"></span></button>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
+
+    <!-- ======================= CTA ======================= -->
+    <section class="sec" style="padding-top:0">
+      <div class="cta">
+        <div class="grid-bg" style="position:absolute;inset:0;opacity:.6;pointer-events:none"></div>
+        <span data-icon="shield" data-size="48" class="sh" style="display:block"></span>
+        <h2>¿Listo para verificar tu identidad?</h2>
+        <p>Ten a la mano tu documento y busca un lugar iluminado. Toma menos de un minuto.</p>
+        <a href="#verificar" class="btn btn-primary btn-lg" style="position:relative;margin-top:2rem">Comenzar ahora <span data-icon="arrow-right" data-size="16"></span></a>
+      </div>
+    </section>
   </main>
 
+  <!-- ======================= FOOTER ======================= -->
   <footer class="site">
     <div class="wrap bar">
-      <span class="logo">
-        <span class="mark" data-icon="shield" data-stroke="2.5"></span>
-        <span class="name">Veridia</span>
-      </span>
+      <a class="logo" href="#top"><span class="mark" data-icon="shield" data-stroke="2.5"></span><span class="name">Veridia</span></a>
       <p style="margin:0">Verificación biométrica de identidad · Todo el procesamiento ocurre en tu dispositivo.</p>
     </div>
   </footer>
 
 <script type="module">
 /* ========================================================================
-   Veridia — Reconocimiento facial (standalone, un solo archivo)
-   Mismo diseño que la landing. Carga @vladmandic/face-api y sus modelos
-   desde un CDN público. Todo el análisis corre en el navegador: nada se
-   transmite ni se almacena.
+   Veridia — Landing + reconocimiento facial, en un solo archivo HTML.
+   El módulo facial usa @vladmandic/face-api (MIT) sobre TensorFlow.js,
+   con modelos cargados desde un CDN público. Todo corre en el navegador:
+   ninguna imagen se transmite ni se almacena.
    ======================================================================== */
 import * as faceapi from "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/dist/face-api.esm.js";
 const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model";
@@ -403,58 +598,64 @@ const ICONS = {
   eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
   smile: '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>',
   scan: '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>',
-  bulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+  "credit-card": '<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>',
+  "user-check": '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/>',
+  "badge-check": '<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>',
+  cpu: '<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>',
+  "scan-line": '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/>',
+  zap: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+  lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  focus: '<circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>',
+  fingerprint: '<path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>',
   camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
   check: '<path d="M20 6 9 17l-5-5"/>',
   refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
   alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
-  "arrow-left": '<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>',
   "arrow-right": '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
   info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
 };
 function iconSvg(name, size = 20, stroke = 2) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] || ""}</svg>`;
 }
-document.querySelectorAll("[data-icon]").forEach((el) => {
-  el.innerHTML = iconSvg(el.dataset.icon, +(el.dataset.size || 20), +(el.dataset.stroke || 2));
-});
+function paintIcons(root = document) {
+  root.querySelectorAll("[data-icon]:not([data-done])").forEach((el) => {
+    el.insertAdjacentHTML("afterbegin", iconSvg(el.dataset.icon, +(el.dataset.size || 20), +(el.dataset.stroke || 2)));
+    el.setAttribute("data-done", "");
+  });
+}
+paintIcons();
 
-/* ---------- Retos ---------- */
+/* Puntos de la silueta facial del teléfono (hero) */
+const FACE_DOTS = [[70,105],[80,101],[90,105],[110,105],[120,101],[130,105],[100,120],[100,135],[92,145],[108,145],[80,170],[90,176],[100,178],[110,176],[120,170],[58,130],[62,160],[75,190],[100,205],[125,190],[138,160],[142,130]];
+document.getElementById("faceDots").innerHTML = FACE_DOTS.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2"/>`).join("");
+
+/* ====================== MÓDULO FACIAL ====================== */
 const CHALLENGES = {
   blink: { label: "Parpadea", hint: "Cierra los ojos un instante y vuelve a abrirlos", icon: "eye", anim: "anim-blink" },
   left:  { label: "Gira a tu izquierda", hint: "Gira suavemente la cabeza", icon: "arrow-left", anim: "anim-left" },
   right: { label: "Gira a tu derecha", hint: "Gira suavemente la cabeza", icon: "arrow-right", anim: "anim-right" },
   smile: { label: "Sonríe", hint: "Muestra una sonrisa natural", icon: "smile", anim: "anim-pop" },
 };
-const OVAL = { cx: 0.5, cy: 0.475, rx: 0.36, ry: 0.355 };
-const CHALLENGE_TIMEOUT = 10000;
-const MAX_TIMEOUTS = 4;
-const ANALYSIS_WIDTH = 480;
-const BASELINE_SIZE = 40;
-const now = () => performance.now();
+// arrow-left es solo para el reto; lo añadimos al set de iconos.
+ICONS["arrow-left"] = '<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>';
 
-/* ---------- Elementos ---------- */
+const OVAL = { cx: 0.5, cy: 0.475, rx: 0.36, ry: 0.355 };
+const CHALLENGE_TIMEOUT = 10000, MAX_TIMEOUTS = 4, ANALYSIS_WIDTH = 480, BASELINE_SIZE = 40;
+const now = () => performance.now();
 const $ = (id) => document.getElementById(id);
 const stage = $("stage"), video = $("video"), mesh = $("mesh"), mctx = mesh.getContext("2d");
-const ovalStroke = $("ovalStroke"), scanwrap = $("scanwrap");
-const msgEl = $("msg"), noticeEl = $("notice"), challengeEl = $("challenge");
+const ovalStroke = $("ovalStroke"), scanwrap = $("scanwrap"), msgEl = $("msg"), noticeEl = $("notice"), challengeEl = $("challenge");
 const cover = $("cover"), introView = $("introView"), loadView = $("loadView"), errView = $("errView");
 const doneCover = $("doneCover"), actionsEl = $("actions"), preview = $("preview");
 
-/* ---------- Estado ---------- */
 const S = {
-  phase: "intro", running: false, busy: false,
-  challenges: [], idx: 0, goodFrames: 0,
-  challengeStart: 0, startedAt: 0,
-  earBase: [], contrastBase: [], eyesClosed: false, closedAt: 0,
-  timeouts: 0, timeoutsHere: 0, captureFails: 0,
-  message: "",
+  phase: "intro", running: false, busy: false, challenges: [], idx: 0, goodFrames: 0,
+  challengeStart: 0, startedAt: 0, earBase: [], contrastBase: [], eyesClosed: false, closedAt: 0,
+  timeouts: 0, timeoutsHere: 0, captureFails: 0, message: "",
 };
 let loopTimer = null, noticeTimer = null, faceReady = false, report = null;
-const frameCanvas = document.createElement("canvas");
-const eyeScratch = document.createElement("canvas");
+const frameCanvas = document.createElement("canvas"), eyeScratch = document.createElement("canvas");
 
-/* ---------- Carga de modelos ---------- */
 async function loadModels() {
   if (faceReady) return;
   const steps = [
@@ -468,42 +669,28 @@ async function loadModels() {
     $("loadBar").style.width = `${Math.round((i / steps.length) * 100)}%`;
     await steps[i][1]();
   }
-  $("loadBar").style.width = "100%";
-  faceReady = true;
+  $("loadBar").style.width = "100%"; faceReady = true;
 }
-// Empezar a descargar en segundo plano apenas carga la página.
 loadModels().catch(() => {});
 
-/* ---------- Cámara ---------- */
 let stream = null;
 async function startCamera() {
   stopCamera();
-  stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false,
-  });
+  stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
   video.srcObject = stream;
   await new Promise((res, rej) => {
     const t = setTimeout(() => rej(new Error("timeout")), 6000);
     video.onloadedmetadata = () => { clearTimeout(t); video.play().then(res).catch(res); };
   });
 }
-function stopCamera() {
-  if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; }
-  video.srcObject = null;
-}
+function stopCamera() { if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; } video.srcObject = null; }
 
-/* ---------- Métricas ---------- */
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-function eyeAspectRatio(eye) {
-  const v = (dist(eye[1], eye[5]) + dist(eye[2], eye[4])) / 2;
-  return v / (dist(eye[0], eye[3]) || 1);
-}
+function eyeAspectRatio(eye) { const v = (dist(eye[1], eye[5]) + dist(eye[2], eye[4])) / 2; return v / (dist(eye[0], eye[3]) || 1); }
 function estimateYaw(pts) {
   const le = pts.slice(36, 42), re = pts.slice(42, 48);
-  const lc = le.reduce((a, p) => a + p.x, 0) / le.length;
-  const rc = re.reduce((a, p) => a + p.x, 0) / re.length;
-  const mid = (lc + rc) / 2, span = (rc - lc) || 1;
-  return (pts[30].x - mid) / span;
+  const lc = le.reduce((a, p) => a + p.x, 0) / le.length, rc = re.reduce((a, p) => a + p.x, 0) / re.length;
+  const mid = (lc + rc) / 2, span = (rc - lc) || 1; return (pts[30].x - mid) / span;
 }
 function eyeContrast(src, eye, scratch) {
   const xs = eye.map((p) => p.x), ys = eye.map((p) => p.y);
@@ -513,73 +700,43 @@ function eyeContrast(src, eye, scratch) {
   scratch.width = w; scratch.height = h;
   const ctx = scratch.getContext("2d", { willReadFrequently: true });
   try { ctx.drawImage(src, minX, minY, w, h, 0, 0, w, h); } catch { return 0; }
-  const data = ctx.getImageData(0, 0, w, h).data;
-  let sum = 0, sum2 = 0, n = w * h;
-  for (let i = 0; i < data.length; i += 4) {
-    const g = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-    sum += g; sum2 += g * g;
-  }
-  const mean = sum / n, varr = Math.max(0, sum2 / n - mean * mean);
-  return Math.sqrt(varr) / (mean + 1);
+  const data = ctx.getImageData(0, 0, w, h).data; let sum = 0, sum2 = 0, n = w * h;
+  for (let i = 0; i < data.length; i += 4) { const g = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114; sum += g; sum2 += g * g; }
+  const mean = sum / n, varr = Math.max(0, sum2 / n - mean * mean); return Math.sqrt(varr) / (mean + 1);
 }
-function median(arr) {
-  if (!arr.length) return 0;
-  const s = [...arr].sort((a, b) => a - b);
-  const m = s.length >> 1;
-  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
-}
-function coverRect(sw, sh, dw, dh) {
-  const scale = Math.max(dw / sw, dh / sh);
-  const w = dw / scale, h = dh / scale;
-  return { sx: (sw - w) / 2, sy: (sh - h) / 2, sw: w, sh: h };
-}
+function median(arr) { if (!arr.length) return 0; const s = [...arr].sort((a, b) => a - b), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+function coverRect(sw, sh, dw, dh) { const scale = Math.max(dw / sw, dh / sh), w = dw / scale, h = dh / scale; return { sx: (sw - w) / 2, sy: (sh - h) / 2, sw: w, sh: h }; }
 function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
-/* ---------- UI helpers ---------- */
 function setOvalColor(c) { ovalStroke.setAttribute("stroke", c); }
 function setProgress(p) { ovalStroke.style.strokeDashoffset = String(100 - Math.max(p, 0)); }
 function feedback(text, tone) {
-  if (S.message === text + tone) return;
-  S.message = text + tone;
-  msgEl.textContent = text;
-  msgEl.className = "msg " + tone;
-  msgEl.style.display = text ? "block" : "none";
+  if (S.message === text + tone) return; S.message = text + tone;
+  msgEl.textContent = text; msgEl.className = "msg " + tone; msgEl.style.display = text ? "block" : "none";
 }
-function showNotice(text) {
-  noticeEl.textContent = text; noticeEl.style.display = "block";
-  if (noticeTimer) clearTimeout(noticeTimer);
-  noticeTimer = setTimeout(() => (noticeEl.style.display = "none"), 3500);
-}
+function showNotice(text) { noticeEl.textContent = text; noticeEl.style.display = "block"; if (noticeTimer) clearTimeout(noticeTimer); noticeTimer = setTimeout(() => (noticeEl.style.display = "none"), 3500); }
 function grabFrame() {
   const w = ANALYSIS_WIDTH, h = Math.round((video.videoHeight / video.videoWidth) * w);
   if (frameCanvas.width !== w || frameCanvas.height !== h) { frameCanvas.width = w; frameCanvas.height = h; }
-  frameCanvas.getContext("2d", { willReadFrequently: true }).drawImage(video, 0, 0, w, h);
-  return frameCanvas;
+  frameCanvas.getContext("2d", { willReadFrequently: true }).drawImage(video, 0, 0, w, h); return frameCanvas;
 }
 function renderActions() {
   actionsEl.innerHTML = "";
   S.challenges.forEach((ch, i) => {
-    const state = S.phase === "done" || S.phase === "capture" || i < S.idx ? "done"
-      : S.phase === "challenge" && i === S.idx ? "active" : "pending";
-    const li = document.createElement("li");
-    li.className = state;
-    li.innerHTML = (state === "done" ? iconSvg("check", 16) : iconSvg(CHALLENGES[ch].icon, 16)) +
-      `<span style="line-height:1.1">${CHALLENGES[ch].label}</span>`;
+    const state = S.phase === "done" || S.phase === "capture" || i < S.idx ? "done" : S.phase === "challenge" && i === S.idx ? "active" : "pending";
+    const li = document.createElement("li"); li.className = state;
+    li.innerHTML = (state === "done" ? iconSvg("check", 16) : iconSvg(CHALLENGES[ch].icon, 16)) + `<span style="line-height:1.1">${CHALLENGES[ch].label}</span>`;
     actionsEl.appendChild(li);
   });
 }
 function showChallengeCard() {
-  const ch = S.challenges[S.idx];
-  if (!ch) { challengeEl.style.display = "none"; return; }
+  const ch = S.challenges[S.idx]; if (!ch) { challengeEl.style.display = "none"; return; }
   const cfg = CHALLENGES[ch];
   $("chIcon").innerHTML = `<span class="${cfg.anim}" style="display:grid">${iconSvg(cfg.icon, 24, 2.5)}</span>`;
   $("chKicker").textContent = `Acción ${S.idx + 1} de ${S.challenges.length}`;
-  $("chLabel").textContent = cfg.label;
-  challengeEl.style.display = "flex";
-  const bar = $("countbar");
-  bar.classList.remove("run"); void bar.offsetWidth;
-  bar.querySelector("span").style.animationDuration = CHALLENGE_TIMEOUT + "ms";
-  bar.classList.add("run");
+  $("chLabel").textContent = cfg.label; challengeEl.style.display = "flex";
+  const bar = $("countbar"); bar.classList.remove("run"); void bar.offsetWidth;
+  bar.querySelector("span").style.animationDuration = CHALLENGE_TIMEOUT + "ms"; bar.classList.add("run");
 }
 function setCover(view) {
   cover.classList.toggle("hidden", !view);
@@ -588,50 +745,27 @@ function setCover(view) {
   errView.style.display = view === "error" ? "block" : "none";
 }
 
-/* ---------- Flujo ---------- */
 $("startBtn").addEventListener("click", begin);
 $("retryBtn").addEventListener("click", begin);
-$("topBtn").addEventListener("click", () => { $("module").scrollIntoView({ behavior: "smooth" }); });
 $("againBtn").addEventListener("click", begin);
 $("downloadBtn").addEventListener("click", downloadReport);
 window.addEventListener("pagehide", stopCamera);
 
 async function begin() {
-  $("result").classList.remove("show");
-  stage.style.display = "";
-  actionsEl.style.display = "flex";
-  preview.style.display = "none";
-  doneCover.classList.add("hidden");
-  feedback("", "neutral");
-  noticeEl.style.display = "none";
+  $("result").classList.remove("show"); stage.style.display = ""; actionsEl.style.display = "flex";
+  preview.style.display = "none"; doneCover.classList.add("hidden"); feedback("", "neutral"); noticeEl.style.display = "none";
   setProgress(0); setOvalColor("rgba(255,255,255,0.55)");
   S.phase = "loading"; setCover("loading");
-  try {
-    await loadModels();
-    $("loadMsg").textContent = "Encendiendo la cámara…";
-    await startCamera();
-  } catch (e) { return fail(cameraError(e)); }
-
+  try { await loadModels(); $("loadMsg").textContent = "Encendiendo la cámara…"; await startCamera(); }
+  catch (e) { return fail(cameraError(e)); }
   const picked = shuffle(["blink", "smile", Math.random() < 0.5 ? "left" : "right"]);
-  Object.assign(S, {
-    phase: "position", running: true, busy: false,
-    challenges: picked, idx: 0, goodFrames: 0,
-    earBase: [], contrastBase: [], eyesClosed: false,
-    timeouts: 0, timeoutsHere: 0, captureFails: 0,
-    startedAt: now(), message: "",
-  });
-  renderActions();
-  setCover(null);
-  challengeEl.style.display = "none";
-  loop();
+  Object.assign(S, { phase: "position", running: true, busy: false, challenges: picked, idx: 0, goodFrames: 0,
+    earBase: [], contrastBase: [], eyesClosed: false, timeouts: 0, timeoutsHere: 0, captureFails: 0, startedAt: now(), message: "" });
+  renderActions(); setCover(null); challengeEl.style.display = "none"; loop();
 }
-
 function fail(text) {
-  S.running = false; clearTimeout(loopTimer); stopCamera();
-  mctx.clearRect(0, 0, mesh.width, mesh.height);
-  scanwrap.style.display = "none"; challengeEl.style.display = "none";
-  $("errMsg").textContent = text;
-  S.phase = "error"; setCover("error");
+  S.running = false; clearTimeout(loopTimer); stopCamera(); mctx.clearRect(0, 0, mesh.width, mesh.height);
+  scanwrap.style.display = "none"; challengeEl.style.display = "none"; $("errMsg").textContent = text; S.phase = "error"; setCover("error");
 }
 function cameraError(e) {
   const n = e?.name || "";
@@ -642,58 +776,40 @@ function cameraError(e) {
   if (e?.message === "timeout") return "La cámara tardó demasiado en responder. Reintenta.";
   return "No pudimos iniciar la cámara: " + (e?.message || e);
 }
-
 function loop() {
   if (!S.running) return;
   if (video.readyState >= 2 && video.videoWidth && !S.busy) {
     analyze().catch(() => {}).finally(() => { if (S.running) loopTimer = setTimeout(loop, 0); });
-  } else if (S.running) {
-    loopTimer = setTimeout(loop, 30);
-  }
+  } else if (S.running) { loopTimer = setTimeout(loop, 30); }
 }
-
 async function analyze() {
   const frame = grabFrame();
   const needExpr = S.phase === "capture" || (S.phase === "challenge" && S.challenges[S.idx] === "smile");
-  const base = faceapi
-    .detectSingleFace(frame, new faceapi.TinyFaceDetectorOptions({ inputSize: 288, scoreThreshold: 0.45 }))
-    .withFaceLandmarks();
+  const base = faceapi.detectSingleFace(frame, new faceapi.TinyFaceDetectorOptions({ inputSize: 288, scoreThreshold: 0.45 })).withFaceLandmarks();
   const det = needExpr ? await base.withFaceExpressions() : await base;
   if (S.running) process(frame, det || null);
 }
-
 function process(frame, det) {
-  const cw = stage.clientWidth, ch = stage.clientHeight;
-  const c = coverRect(frame.width, frame.height, cw, ch);
+  const cw = stage.clientWidth, ch = stage.clientHeight, c = coverRect(frame.width, frame.height, cw, ch);
   const dpr = window.devicePixelRatio || 1;
   if (mesh.width !== cw * dpr) { mesh.width = cw * dpr; mesh.height = ch * dpr; }
-  mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  mctx.clearRect(0, 0, cw, ch);
-
+  mctx.setTransform(dpr, 0, 0, dpr, 0, 0); mctx.clearRect(0, 0, cw, ch);
   if (S.phase === "challenge" && now() - S.challengeStart > CHALLENGE_TIMEOUT) { handleTimeout(); return; }
-
   if (!det) { S.goodFrames = 0; feedback("Ubica tu rostro dentro del óvalo", "warn"); return; }
 
   const pts = det.landmarks.positions;
   mctx.fillStyle = "rgba(94, 234, 212, 0.55)";
-  for (const p of pts) {
-    const x = (1 - (p.x - c.sx) / c.sw) * cw, y = ((p.y - c.sy) / c.sh) * ch;
-    mctx.beginPath(); mctx.arc(x, y, 1.4, 0, Math.PI * 2); mctx.fill();
-  }
+  for (const p of pts) { const x = (1 - (p.x - c.sx) / c.sw) * cw, y = ((p.y - c.sy) / c.sh) * ch; mctx.beginPath(); mctx.arc(x, y, 1.4, 0, Math.PI * 2); mctx.fill(); }
 
   const box = det.detection.box;
-  const cx = 1 - (box.x + box.width / 2 - c.sx) / c.sw;
-  const cy = (box.y + box.height / 2 - c.sy) / c.sh;
-  const width = box.width / c.sw;
-  const yaw = estimateYaw(pts);
-  const happy = det.expressions?.happy ?? 0;
+  const cx = 1 - (box.x + box.width / 2 - c.sx) / c.sw, cy = (box.y + box.height / 2 - c.sy) / c.sh, width = box.width / c.sw;
+  const yaw = estimateYaw(pts), happy = det.expressions?.happy ?? 0;
   const offset = ((cx - OVAL.cx) / OVAL.rx) ** 2 + ((cy - OVAL.cy) / OVAL.ry) ** 2;
 
   const leftEye = det.landmarks.getLeftEye(), rightEye = det.landmarks.getRightEye();
   const ear = (eyeAspectRatio(leftEye) + eyeAspectRatio(rightEye)) / 2;
   const contrast = (eyeContrast(frame, leftEye, eyeScratch) + eyeContrast(frame, rightEye, eyeScratch)) / 2;
-  const earRef = median(S.earBase), contrastRef = median(S.contrastBase);
-  const calibrated = S.earBase.length >= 6;
+  const earRef = median(S.earBase), contrastRef = median(S.contrastBase), calibrated = S.earBase.length >= 6;
   const looksClosed = calibrated && (ear < earRef * 0.8 || contrast < contrastRef * 0.68);
   const looksOpen = !calibrated || (ear > earRef * 0.9 && contrast > contrastRef * 0.85);
   if (Math.abs(yaw) < 0.2 && !looksClosed && !S.eyesClosed) {
@@ -709,25 +825,15 @@ function process(frame, det) {
     else if (Math.abs(yaw) > (S.phase === "capture" ? 0.16 : 0.25)) issue = "Mira directamente a la cámara";
     else if (S.phase === "capture" && happy > 0.6) issue = "Mantén una expresión neutral";
     else if (S.phase === "capture" && looksClosed) issue = "Mantén los ojos abiertos";
-
     if (issue) { S.goodFrames = 0; feedback(issue, "warn"); return; }
     S.goodFrames++;
-
-    if (S.phase === "position") {
-      feedback("¡Perfecto! Mantente así", "ok");
-      setOvalColor("#34d399");
-      if (S.goodFrames >= 10) startChallenge(0, true);
-      return;
-    }
-    feedback("Capturando… no te muevas", "ok");
-    if (S.goodFrames >= 4) capture();
-    return;
+    if (S.phase === "position") { feedback("¡Perfecto! Mantente así", "ok"); setOvalColor("#34d399"); if (S.goodFrames >= 10) startChallenge(0, true); return; }
+    feedback("Capturando… no te muevas", "ok"); if (S.goodFrames >= 4) capture(); return;
   }
 
   if (S.phase === "challenge") {
     if (offset > 0.9 || width < 0.25) { feedback("Mantén tu rostro dentro del óvalo", "warn"); return; }
-    const current = S.challenges[S.idx];
-    let passed = false;
+    const current = S.challenges[S.idx]; let passed = false;
     if (current === "blink") {
       if (!S.eyesClosed && looksClosed) { S.eyesClosed = true; S.closedAt = now(); }
       else if (S.eyesClosed && looksOpen) { passed = true; }
@@ -735,59 +841,36 @@ function process(frame, det) {
       feedback(S.eyesClosed ? "¡Bien! Ahora abre los ojos" : CHALLENGES.blink.hint, S.eyesClosed ? "ok" : "neutral");
     } else {
       feedback(CHALLENGES[current].hint, "neutral");
-      if (current === "left") passed = yaw > 0.3;
-      else if (current === "right") passed = yaw < -0.3;
-      else if (current === "smile") passed = happy > 0.75;
+      if (current === "left") passed = yaw > 0.3; else if (current === "right") passed = yaw < -0.3; else if (current === "smile") passed = happy > 0.75;
     }
     if (passed) {
       const next = S.idx + 1;
-      if (next >= S.challenges.length) {
-        S.idx = next; S.goodFrames = 0; S.phase = "capture";
-        renderActions(); challengeEl.style.display = "none";
-        setProgress(92); feedback("Ahora mira al frente", "ok");
-      } else {
-        startChallenge(next, true);
-      }
+      if (next >= S.challenges.length) { S.idx = next; S.goodFrames = 0; S.phase = "capture"; renderActions(); challengeEl.style.display = "none"; setProgress(92); feedback("Ahora mira al frente", "ok"); }
+      else { startChallenge(next, true); }
     }
     setProgress((S.idx / Math.max(S.challenges.length, 1)) * 85);
   }
 }
-
 function handleTimeout() {
   S.timeouts++; S.timeoutsHere++;
   if (S.timeouts > MAX_TIMEOUTS) { fail("No pudimos detectar las acciones solicitadas. Busca buena iluminación frontal y vuelve a intentarlo."); return; }
   if (S.timeoutsHere >= 2) {
-    const unused = ["blink", "smile", "left", "right"].filter((c) => !S.challenges.includes(c));
-    const rep = shuffle(unused)[0];
-    if (rep) {
-      S.challenges = S.challenges.map((c, i) => (i === S.idx ? rep : c));
-      renderActions();
-      showNotice(`Probemos otra acción: ${CHALLENGES[rep].label.toLowerCase()}`);
-      startChallenge(S.idx, true);
-      return;
-    }
+    const unused = ["blink", "smile", "left", "right"].filter((c) => !S.challenges.includes(c)), rep = shuffle(unused)[0];
+    if (rep) { S.challenges = S.challenges.map((c, i) => (i === S.idx ? rep : c)); renderActions(); showNotice(`Probemos otra acción: ${CHALLENGES[rep].label.toLowerCase()}`); startChallenge(S.idx, true); return; }
   }
-  showNotice("No detectamos la acción. Intentémoslo otra vez, con calma.");
-  startChallenge(S.idx, false);
+  showNotice("No detectamos la acción. Intentémoslo otra vez, con calma."); startChallenge(S.idx, false);
 }
-
 function startChallenge(i, fresh) {
-  S.idx = i; S.challengeStart = now(); S.eyesClosed = false;
-  if (fresh) S.timeoutsHere = 0;
-  S.phase = "challenge";
-  renderActions();
-  showChallengeCard();
-  setProgress((i / Math.max(S.challenges.length, 1)) * 85);
+  S.idx = i; S.challengeStart = now(); S.eyesClosed = false; if (fresh) S.timeoutsHere = 0; S.phase = "challenge";
+  renderActions(); showChallengeCard(); setProgress((i / Math.max(S.challenges.length, 1)) * 85);
 }
-
 async function capture() {
   S.busy = true;
   try {
     const shot = document.createElement("canvas");
     shot.width = 720; shot.height = Math.round((video.videoHeight / video.videoWidth) * 720);
     shot.getContext("2d").drawImage(video, 0, 0, shot.width, shot.height);
-    const det = await faceapi
-      .detectSingleFace(shot, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 }))
+    const det = await faceapi.detectSingleFace(shot, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 }))
       .withFaceLandmarks().withFaceDescriptor().catch(() => null);
     if (!det || !det.descriptor || !Array.from(det.descriptor).every(Number.isFinite)) {
       S.goodFrames = 0; S.captureFails++;
@@ -796,13 +879,10 @@ async function capture() {
     }
     const image = shot.toDataURL("image/jpeg", 0.9);
     S.running = false; stopCamera(); mctx.clearRect(0, 0, mesh.width, mesh.height);
-    S.phase = "done"; setProgress(100); setOvalColor("#34d399");
-    renderActions(); challengeEl.style.display = "none"; feedback("", "neutral");
-    preview.src = image; preview.style.display = "block";
-    doneCover.classList.remove("hidden");
+    S.phase = "done"; setProgress(100); setOvalColor("#34d399"); renderActions(); challengeEl.style.display = "none"; feedback("", "neutral");
+    preview.src = image; preview.style.display = "block"; doneCover.classList.remove("hidden");
     report = {
-      modulo: "reconocimiento-facial",
-      resultado: "prueba_de_vida_superada",
+      modulo: "reconocimiento-facial", resultado: "prueba_de_vida_superada",
       accionesCompletadas: S.challenges.map((c) => CHALLENGES[c].label),
       duracionSegundos: +((now() - S.startedAt) / 1000).toFixed(1),
       confianzaDeteccion: +det.detection.score.toFixed(4),
@@ -812,15 +892,10 @@ async function capture() {
       nota: "Procesado localmente en el navegador. Ninguna imagen fue transmitida ni almacenada.",
     };
     setTimeout(() => showResult(image, det.detection.score, det.descriptor.length), 1400);
-  } finally {
-    S.busy = false;
-  }
+  } finally { S.busy = false; }
 }
-
 function showResult(image, score, dims) {
-  stage.style.display = "none";
-  actionsEl.style.display = "none";
-  $("ctxAlert").classList.remove("show");
+  stage.style.display = "none"; actionsEl.style.display = "none"; $("ctxAlert").classList.remove("show");
   $("shot").src = image;
   const rows = [
     ["Acciones completadas", S.challenges.map((c) => CHALLENGES[c].label).join(" · ")],
@@ -830,19 +905,14 @@ function showResult(image, score, dims) {
   ];
   $("stats").innerHTML = rows.map(([k, v]) => `<div class="stat"><p class="k">${k}</p><p class="v">${v}</p></div>`).join("");
   $("result").classList.add("show");
-  $("result").scrollIntoView({ behavior: "smooth", block: "start" });
+  $("verificar").scrollIntoView({ behavior: "smooth", block: "start" });
 }
-
 function downloadReport() {
   if (!report) return;
   const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = "reporte-facial.json"; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const url = URL.createObjectURL(blob), a = document.createElement("a");
+  a.href = url; a.download = "reporte-facial.json"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-
-/* Aviso de contexto no seguro */
 if (!window.isSecureContext) $("ctxAlert").classList.add("show");
 </script>
 </body>
